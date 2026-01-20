@@ -1,23 +1,24 @@
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Tuple, Union
 
 
 class FileOperation(ABC):
     def __init__(self, **kwargs):
-        self.ready: bool = True
-        self.__stop: bool = False
-        self.sleep: float = 60.0
-        self.files_for_task: tuple = ()
-        self.pattern: tuple = ()
-        self.src: str = ""
-        self.dst: str = ""
+        self.sleep: float = kwargs.get('sleep', 60)
+        self.repeat: bool = kwargs.get('repeat', False)
+        self.files_for_task: Tuple[Union[Path]] = tuple()
+        self.pattern: tuple = kwargs.get('pattern', ())
+        self.src: str = kwargs.get('src', '')
+        self.dst: str = kwargs.get('dst', '')
 
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        # for key, value in kwargs.items():
+        #     setattr(self, key, value)
 
         self.source_directory = Path(self.src)
         self.target_directory = Path(self.dst)
+        self.stop: bool = False
 
     def get_files(self):
         # Використовуємо rglob, якщо треба шукати і в підпапках, або glob для поточної
@@ -43,7 +44,6 @@ class FileOperation(ABC):
         self.check_directories()
         while True:
             try:
-
                 self.get_files()
 
                 if len(self.files_for_task) == 0:
@@ -53,7 +53,6 @@ class FileOperation(ABC):
                     continue
 
                 self.do_task()
-
 
             except KeyboardInterrupt:
                 self.stop = True
@@ -75,14 +74,6 @@ class FileOperation(ABC):
         self._sleep = int(value)
 
     @property
-    def stop(self):
-        return self.__stop
-
-    @stop.setter
-    def stop(self, value):
-        self.__stop = value
-
-    @property
     def pattern(self):
         return self._pattern
 
@@ -92,3 +83,11 @@ class FileOperation(ABC):
             self._pattern = (value, )
         else:
             self._pattern = value
+
+    @property
+    def stop(self) -> bool:
+        return self.__stop
+
+    @stop.setter
+    def stop(self, value):
+        self.__stop = value
