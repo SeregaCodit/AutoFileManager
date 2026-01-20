@@ -12,3 +12,4 @@ class HelpStrings:
         "Default - " + str(defaults.sleep) + ". Time in seconds that script will sleep if no files for task in source"
         " directory"
     )
+    step_sec: str = "time interval in seconds between each step"
