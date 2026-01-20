@@ -1,16 +1,38 @@
+from const_utils.default_values import DefaultValues
 from file_operations.file_operation import FileOperation
+from tools.video_slicer import VideoSlicer
 
 
 class SliceOperation(FileOperation):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.step_sec: float = kwargs.get('step_sec', 1)
-        self.img_type: str = kwargs.get('img_type', '.jpg')
+        self.suffix: str = kwargs.get('type', '.jpg')
+        # self.proceeded_files: list = list()
+
 
 
     def do_task(self):
         for file_path in self.files_for_task:
             if file_path.is_file():
-                img_counter = 0
-                target_file_path = self.target_directory / file_path.name.split(".")[-2] + "_" + str(img_counter) + ".jpg"
-                print(f"Slicing {file_path.name}")
+                print(f"[{self.__class__.__name__}] {file_path}]", end=" ")
+                sliced_count = VideoSlicer.slice(
+                    source_file=file_path,
+                    target_dir=self.target_directory,
+                    suffix=self.suffix,
+                    step=self.step_sec
+                )
+                print(f"-> sliced to {sliced_count} images", end="\n")
+
+        self.stop = True
+
+    @property
+    def step_sec(self) -> float:
+        return self._step_sec
+
+    @step_sec.setter
+    def step_sec(self, value) -> None:
+        if not isinstance(value, (int, float)):
+            value = float(value)
+
+        self._step_sec = value
