@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 from const_utils.arguments import Arguments
 from const_utils.default_values import DefaultValues
@@ -13,9 +14,16 @@ class SliceOperation(FileOperation):
         super().__init__(**kwargs)
         self.step_sec: float = kwargs.get("step_sec", DefaultValues.step_sec)
         self.suffix: str = kwargs.get('type', DefaultValues.type)
+        self.remove: bool = kwargs.get('remove', DefaultValues.remove)
 
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument(Arguments.dst, help=HelpStrings.dst)
+        parser.add_argument(
+            Arguments.remove, Arguments.rm,
+            help=HelpStrings.remove,
+            action='store_true'
+        )
         parser.add_argument(
             Arguments.type, Arguments.t,
             help=HelpStrings.type,
@@ -39,7 +47,15 @@ class SliceOperation(FileOperation):
                 )
                 print(f"-> sliced to {sliced_count} images", end="\n")
 
-        self.stop = True
+                if self.remove:
+                    self.remove_source(file_path)
+
+        # self.stop = True
+
+    @staticmethod
+    def remove_source(source_file: Path) -> None:
+        """delete source file that just was sliced"""
+        source_file.unlink(missing_ok=True)
 
     @property
     def step_sec(self) -> float:
