@@ -66,6 +66,11 @@ class FileOperation(ABC):
             if self.stop or not self.repeat:
                 break
 
+    @staticmethod
+    @abstractmethod
+    def add_arguments(parser: argparse.ArgumentParser) -> None:
+        """Add specific arguments for operation"""
+        pass
     @abstractmethod
     def do_task(self):
         """Abstract method to do a task of a file operation"""
