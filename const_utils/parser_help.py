@@ -5,6 +5,7 @@ from const_utils.default_values import DefaultValues as defaults
 class HelpStrings:
     """Help strings for commands and arguments"""
     move: str = "move files from source directory to target directory"
+    delete: str = "delete files that match patterns from source directory"
     slice: str = "slice video files to images from the source directory to the target directory"
     src: str = "source directory"
     dst: str = "destination directory"
@@ -16,3 +17,4 @@ class HelpStrings:
     )
     step_sec: str = "time interval in seconds between each step"
     type: str = "destination type of file"
+    remove: str = "remove video file after slicing"
