@@ -1,12 +1,15 @@
 import argparse
 import shutil
 
+from const_utils.arguments import Arguments
+from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
 
 class MoveOperation(FileOperation):
     """Move files that match a patterns from source directory to target directory """
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument(Arguments.dst, help=HelpStrings.dst)
         pass
 
     def do_task(self):
