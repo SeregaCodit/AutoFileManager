@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Union
 
 
 @dataclass
 class DefaultValues:
     """Default values of positional arguments"""
+    remove = False
     pattern: tuple = ()
     sleep: Union[int, bool] = 60
     type: str = ".jpg"

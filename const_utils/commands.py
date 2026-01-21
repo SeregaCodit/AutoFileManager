@@ -5,3 +5,4 @@ class Commands:
     """Command names"""
     move: str = "move"
     slice: str = "slice"
+    delete: str = "delete"

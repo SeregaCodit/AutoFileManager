@@ -15,3 +15,5 @@ class Arguments:
     step: str = "-step"
     type: str = "--type"
     t: str = "-t"
+    remove: str = "--remove"
+    rm: str = "-rm"
