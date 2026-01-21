@@ -3,6 +3,7 @@ from const_utils.default_values import DefaultValues as defaults
 
 @dataclass
 class HelpStrings:
+    """Help strings for commands and arguments"""
     move: str = "move files from source directory to target directory"
     src: str = "source directory"
     dst: str = "destination directory"
