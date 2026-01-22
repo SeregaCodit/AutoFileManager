@@ -1,4 +1,5 @@
 import argparse
+
 from const_utils.parser_help import HelpStrings as hs
 from const_utils.commands import Commands
 from const_utils.arguments import Arguments as arg
@@ -6,6 +7,7 @@ from const_utils.default_values import DefaultValues as defaults
 from file_operations.delete import DeleteOperation
 from file_operations.move import MoveOperation
 from file_operations.slice import SliceOperation
+from logger.log_level_mapping import LevelMapping
 
 
 class FileManager:
@@ -29,6 +31,8 @@ class FileManager:
         parser.add_argument(arg.pattern, arg.p, help=hs.pattern, nargs="+", default=[defaults.pattern])
         parser.add_argument(arg.repeat, arg.r, help=hs.repeat, action='store_true')
         parser.add_argument(arg.sleep, arg.s, help=hs.sleep, default=defaults.sleep)
+        parser.add_argument(arg.log_path, help=hs.log_path, default=defaults.log_path)
+        parser.add_argument(arg.log_level, help=hs.log_level, default=defaults.log_level)
 
     def _setup_commands(self) -> None:
         """setup all commands"""
@@ -51,18 +55,18 @@ if __name__ == "__main__":
     import sys
 
     # Емулюємо введення в терміналі:
-    # #-----SLICE-----
-    # sys.argv = [
-    #     "fileManager.py",
-    #     "slice",
-    #     "./media/",
-    #     "./media/imgs/",
-    #     "-p", ".mp4", ".MP4",
-    #     "-t", ".jpg",
-    #     "-r",
-    #     "-s", "60",
-    #     "-step", "5",
-    # ]
+    #-----SLICE-----
+    sys.argv = [
+        "fileManager.py",
+        "slice",
+        "./media/",
+        "./media/imgs/",
+        "-p", ".mp4", ".MP4",
+        "-t", ".jpg",
+        # "-r",
+        "-s", "60",
+        "-step", "1",
+    ]
 
     #-----SLICE WITH DELETING-----
     # sys.argv = [
@@ -88,11 +92,11 @@ if __name__ == "__main__":
     #     "-r",
     #     "-s", "30"
     # ]
-    #-----DELETE-----
+    # -----DELETE-----
     # sys.argv = [
     #     "fileManager.py",
     #     "delete",
-    #     "./media/imgs/",
+    #     "./media/imgs_new/",
     #     "-p", ".jpg",
     # ]
     app = FileManager()
