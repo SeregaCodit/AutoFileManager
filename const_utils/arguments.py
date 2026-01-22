@@ -17,3 +17,5 @@ class Arguments:
     t: str = "-t"
     remove: str = "--remove"
     rm: str = "-rm"
+    log_level: str = "--log_level"
+    log_path: str = "--log_path"
