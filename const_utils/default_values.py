@@ -15,3 +15,10 @@ class DefaultValues:
     step_sec: float = 600
     log_path: Path = Path("./log")
     log_level: str = LevelMapping.info
+    image: str = "image"
+    phash: str = "phash"
+    ahash: str = "ahash"
+    dhash: str = "dhash"
+    cnn: str = "cnn"
+    action: str = "copy"
+    hash_threshold: str = 10

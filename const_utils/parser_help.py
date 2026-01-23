@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from const_utils.default_values import DefaultValues as defaults
+from const_utils.default_values import DefaultValues as defaults, DefaultValues
 from logger.log_level_mapping import LevelMapping
 
 
@@ -22,3 +22,10 @@ class HelpStrings:
     remove: str = "remove video file after slicing"
     log_path: str = f"Default: {defaults.log_path} path to log directory"
     log_level: str = f"Default: {defaults.log_level}. A level of logging matches mapping: {str(LevelMapping.mapping())}"
+    filetype: str = "Type of file. Currently this parameter only supports 'image'"
+    method: str = "Default: dhash. A method of comparing images. It's can be ['phash, dhash, ahash, cnn]"
+    action: str = (f"Default: {DefaultValues.action}.\n"
+                   f"copy: copying non duplicates to destination directory, all files stay in same directory"
+                   f"delete: deleting duplicates from source directory. All non duplicates files will be stay in same directory")
+    threshold: str = (f"Default: {DefaultValues.hash_threshold}. A minimal difference between files that means the files"
+                      f" have a different information. Using Hemming distance for *hash methods")
