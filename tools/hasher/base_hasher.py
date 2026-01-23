@@ -12,13 +12,13 @@ class BaseHasher(ABC):
     """a base hasher class"""
     def __init__(
             self,
-            image_dir: Path,
             hash_type: str = DefaultValues.dhash,
+            hash_size: Union[Tuple[int, int], int] = 16,
             threshold: float = 0.1,
             log_path: Path = DefaultValues.log_path,
     ):
         self.hash_type = hash_type
-        self.image_dir = image_dir
+        self.hash_size = hash_size
         self.threshold = threshold
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
@@ -36,12 +36,13 @@ class BaseHasher(ABC):
         hemming_distance = np.count_nonzero(hash1 != hash2)
         return int(hemming_distance)
 
-    def get_hashmap(self, image_paths: List[Path]) -> Dict[Path, np.ndarray]:
+    def get_hashmap(self, image_paths: Tuple[Path]) -> Dict[Path, np.ndarray]:
         """
         :param image_paths: list of images paths
         creating a dict with image path's and their hashes
         """
         hash_map: Dict[Path, np.ndarray] = {}
+
         for path in image_paths:
             if path.is_file():
                 _hash = self.compute_hash(path)
@@ -69,18 +70,33 @@ class BaseHasher(ABC):
                     continue
 
                 hemming_distance = self.calculate_distance(hashmap[unique_image], hashmap[candidate_image])
-                if hemming_distance > self.threshold:
+                if hemming_distance < self.threshold:
+                    self.logger.info(f"duplicate {unique_image} -> {candidate_image}, hemming distance: {hemming_distance}")
                     duplicates.add(candidate_image)
         return list(duplicates)
 
     @property
-    def kernel_size(self) -> Tuple[int, int]:
-        return self.__kernel_size
+    def hash_size(self) -> int:
+        return self._hash_size
 
-    @kernel_size.setter
-    def kernel_size(self, kernel_size: Union[Tuple[int, int], int]) -> None:
-        if isinstance(kernel_size, int):
-            self.__kernel_size = (kernel_size, kernel_size)
+    @hash_size.setter
+    def hash_size(self, value: Union[Tuple[int, int], int]) -> None:
+        if isinstance(value, int):
+            self._hash_size = value
+        elif isinstance(value, tuple):
+            self._hash_size = value[0] if value[0] <= 0 else value[1]
         else:
-            self.__kernel_size = kernel_size
+            self.logger.error(f"hash size must be int or tuple, got {type(value)}")
+            raise TypeError(f"hash size must be int or tuple, got {type(value)}")
+
+    @property
+    def threshold(self) -> int:
+        return self._threshold
+
+    @threshold.setter
+    def threshold(self, value: Union[float, int]) -> None:
+        hash_sqr = self.hash_size * self.hash_size
+        self._threshold = int(hash_sqr * value)
+
+
 
