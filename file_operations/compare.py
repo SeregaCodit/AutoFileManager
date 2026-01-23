@@ -42,13 +42,17 @@ class CompareOperation(FileOperation):
             default=DefaultValues.dhash
         )
         parser.add_argument(
-            Arguments.action. Arguments.a,
+            Arguments.action, Arguments.a,
             help=HelpStrings.action,
             default=DefaultValues.action
         )
 
     def do_task(self):
-        duplicates = self.comparer.compare_files(image_dir=self.source_directory, threshold=self.threshold)
+        duplicates = self.comparer.compare(self.files_for_task)
+        #TODO: допишу завтра
+        pass
+
+
 
 
 
