@@ -48,6 +48,7 @@ class CompareOperation(FileOperation):
         )
 
     def do_task(self):
-        self.comparer.compare_files(image_dir=self.source_directory, threshold=self.threshold)
+        duplicates = self.comparer.compare_files(image_dir=self.source_directory, threshold=self.threshold)
+
 
 
