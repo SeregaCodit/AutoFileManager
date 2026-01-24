@@ -15,13 +15,13 @@ class CompareOperation(FileOperation):
             Constants.image: ImageComparer
         }
 
-        self.filetype = kwargs.get(Arguments.filetype, DefaultValues.image)
-        self.threshold = kwargs.get(Arguments.threshold, DefaultValues.hash_threshold)
-        self.action = kwargs.get(Arguments.action, DefaultValues.action)
-        self.method = kwargs.get(Arguments.method, DefaultValues.dhash)
-        self.comparer = self.mapping[self.filetype](
+        self.filetype = kwargs.get("filetype", DefaultValues.image)
+        self.action = kwargs.get("action", DefaultValues.action)
+        self.method = kwargs.get("method", DefaultValues.dhash)
+        self.comparer: ImageComparer = self.mapping[self.filetype](
             method_name=self.method,
-            log_path = self.log_path
+            log_path = self.log_path,
+            threshold_percentage=float(kwargs.get("threshold", DefaultValues.hash_threshold))
         )
 
     @staticmethod
@@ -49,6 +49,7 @@ class CompareOperation(FileOperation):
 
     def do_task(self):
         duplicates = self.comparer.compare(self.files_for_task)
+        self.logger.info(f"Found {len(duplicates)} duplicates in {len(self.files_for_task)} files")
         #TODO: допишу завтра
         pass
 
