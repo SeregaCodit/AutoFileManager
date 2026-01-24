@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Union
 
 import cv2
 import numpy as np
 
-from tools.hasher.base_hasher import BaseHasher
+from tools.comparer.img_comparer.hasher.base_hasher import BaseHasher
 
 class DHash(BaseHasher):
     """dHash compare algorithm"""
