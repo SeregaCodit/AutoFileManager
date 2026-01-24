@@ -46,11 +46,6 @@ class DedupOperation(FileOperation):
             help=HelpStrings.method,
             default=DefaultValues.dhash
         )
-        parser.add_argument(
-            Arguments.action, Arguments.a,
-            help=HelpStrings.action,
-            default=DefaultValues.action
-        )
 
     def do_task(self):
         duplicates = self.comparer.compare(self.files_for_task)
