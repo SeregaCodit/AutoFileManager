@@ -8,7 +8,10 @@ from file_operations.file_operation import FileOperation
 from tools.comparer.img_comparer.img_comparer import ImageComparer
 
 
-class CompareOperation(FileOperation):
+class DedupOperation(FileOperation):
+    """
+
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.mapping = {

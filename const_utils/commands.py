@@ -6,4 +6,4 @@ class Commands:
     move: str = "move"
     slice: str = "slice"
     delete: str = "delete"
-    compare: str = "compare"
+    dedup: str = "dedup"

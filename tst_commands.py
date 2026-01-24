@@ -10,17 +10,17 @@ if __name__ == "__main__":
     # sys.path.append(str(Path(__file__).parent / "fileManager"))
     # Емулюємо введення в терміналі:
     # -----SLICE-----
-    sys.argv = [
-        str(script_path),
-        "slice",
-        "./media/",
-        "./media/imgs/",
-        "-p", ".mp4", ".MP4",
-        "-t", ".jpg",
-        # "-r",
-        "-s", "60",
-        "-step", "1",
-    ]
+    # sys.argv = [
+    #     str(script_path),
+    #     "slice",
+    #     "./media/",
+    #     "./media/imgs/",
+    #     "-p", ".mp4", ".MP4",
+    #     "-t", ".jpg",
+    #     # "-r",
+    #     "-s", "60",
+    #     "-step", "1",
+    # ]
 
     # -----SLICE WITH DELETING-----
     # sys.argv = [
@@ -52,15 +52,15 @@ if __name__ == "__main__":
     #     "delete",
     #     "./media/imgs_new/",
     #     "-p", ".jpg",
-    # -----COMPARE-----
-    # sys.argv = [
-    #     "fileManager.py",
-    #     "compare",
-    #     "./media/imgs/",
-    #     # "./media/imgs_new/",
-    #     "-p", ".jpg", ".png",
-    #     "--filetype", "image",
-    #     "--threshold", "10",
-    # ]
+    #-----DEDUP-----
+    sys.argv = [
+        "fileManager.py",
+        "dedup",
+        "./media/imgs/",
+        # "./media/imgs_new/",
+        "-p", ".jpg", ".png",
+        "--filetype", "image",
+        "--threshold", "10",
+    ]
     app = FileManager()
     app.execute()
