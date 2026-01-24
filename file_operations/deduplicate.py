@@ -23,7 +23,6 @@ class DedupOperation(FileOperation):
         self.filetype = kwargs.get("filetype", DefaultValues.image)
         self.action = kwargs.get("action", DefaultValues.action)
         self.method = kwargs.get("method", DefaultValues.dhash)
-        self.remove = kwargs.get("remove", DefaultValues.remove)
         self.comparer: ImageComparer = self.mapping[self.filetype](
             method_name=self.method,
             log_path = self.log_path,
@@ -52,18 +51,15 @@ class DedupOperation(FileOperation):
             help=HelpStrings.action,
             default=DefaultValues.action
         )
-        parser.add_argument(
-            Arguments.remove, Arguments.rm,
-            help=HelpStrings.remove,
-            action="store_true",
-        )
 
     def do_task(self):
         duplicates = self.comparer.compare(self.files_for_task)
         self.logger.info(f"Found {len(duplicates)} duplicates in {len(self.files_for_task)} files")
 
-        if self.remove:
-            self.remove_duplicates(duplicates)
+        if len(duplicates) > 0:
+            user_choice = input("for deleting founded duplicate files type 'delete': ")
+            if user_choice.lower() in DefaultValues.confirm_choice:
+                self.remove_duplicates(duplicates)
 
 
     def remove_duplicates(self, duplicates: List[Path]) -> None:
