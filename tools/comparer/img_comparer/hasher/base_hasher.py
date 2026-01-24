@@ -14,7 +14,7 @@ class BaseHasher(ABC):
         self,
         hash_type: str = DefaultValues.dhash,
         hash_size: Union[Tuple[int, int], int] = 16,
-        threshold: float = 10,
+        threshold: int = 10,
         log_path: Path = DefaultValues.log_path,
     ):
         """
@@ -26,7 +26,7 @@ class BaseHasher(ABC):
         """
         self.hash_type = hash_type
         self.hash_size = hash_size
-        self._threshold = threshold
+        self.threshold = threshold
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
             log_path=Path(log_path) / f"{self.__class__.__name__}.log" if log_path else None,
@@ -111,24 +111,24 @@ class BaseHasher(ABC):
         return self._threshold
 
     @threshold.setter
-    def threshold(self, value: Union[float, int, str]) -> None:
+    def threshold(self, value: Union[float, int]) -> None:
         """
         setting a threshold value in percentage. If value is not float type - trying to convert it to float.
         :param value: float or int minimal value in percents that means an image is not a duplicate of comparing image
         """
 
         try:
-            value = float(value)
+            value = int(value)
         except TypeError:
             self.logger.error(f"threshold must be float, got {type(value)}")
             raise TypeError(f"threshold must be float, got {type(value)}")
+        except ValueError:
+            self.logger.error(f"threshold must be real number, got {type(value)}")
+            raise TypeError(f"threshold must be float, got {type(value)}")
 
-        if value < 0:
-            self.logger.error(f"threshold must be non-negative, got {value}")
-            raise ValueError(f"threshold must be non-negative, got {value}")
-
-        if value > DefaultValues.max_percentage:
-            value = DefaultValues.max_percentage
+        if 0 > value > DefaultValues.max_percentage:
+            self.logger.error(f"threshold must be between 0 and 100, got {value}")
+            raise ValueError(f"threshold must be between 0 and 100, got {type(value)}")
 
         hash_sqr = self.hash_size * self.hash_size
         self._threshold = int(hash_sqr * (value / DefaultValues.max_percentage))
