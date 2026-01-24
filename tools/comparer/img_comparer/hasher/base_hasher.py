@@ -26,7 +26,7 @@ class BaseHasher(ABC):
         """
         self.hash_type = hash_type
         self.hash_size = hash_size
-        self.threshold = threshold
+        self._threshold = threshold
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
             log_path=Path(log_path) / f"{self.__class__.__name__}.log" if log_path else None,
@@ -87,15 +87,21 @@ class BaseHasher(ABC):
         return self._hash_size
 
     @hash_size.setter
-    def hash_size(self, value: Union[Tuple[int, int], int]) -> None:
+    def hash_size(self, value: Union[Tuple[int, int], int, float, str]) -> None:
         """
         stups hash size, converts into int type
         :param value: size of hash. Using for resizing an image
         """
         if isinstance(value, int):
             self._hash_size = value
+        elif isinstance(value, (float, str)):
+            try:
+                self._hash_size = int(value)
+            except TypeError:
+                self.logger.error(f"hash size must be int, got {type(value)}")
+                raise TypeError(f"hash size must be int, got {type(value)}")
         elif isinstance(value, tuple):
-            self._hash_size = value[0] if value[0] <= 0 else value[1]
+            self._hash_size = value[0] if value[0] >= 0 else value[1]
         else:
             self.logger.error(f"hash size must be int or tuple, got {type(value)}")
             raise TypeError(f"hash size must be int or tuple, got {type(value)}")
@@ -105,7 +111,7 @@ class BaseHasher(ABC):
         return self._threshold
 
     @threshold.setter
-    def threshold(self, value: Union[float, int]) -> None:
+    def threshold(self, value: Union[float, int, str]) -> None:
         """
         setting a threshold value in percentage. If value is not float type - trying to convert it to float.
         :param value: float or int minimal value in percents that means an image is not a duplicate of comparing image
@@ -113,7 +119,7 @@ class BaseHasher(ABC):
 
         try:
             value = float(value)
-        except ValueError:
+        except TypeError:
             self.logger.error(f"threshold must be float, got {type(value)}")
             raise TypeError(f"threshold must be float, got {type(value)}")
 
