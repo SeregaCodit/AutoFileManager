@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import Union, List, Optional, Tuple
+from typing import Union, Tuple
 
 from const_utils.copmarer import Constants
 from logger.logger import LoggerConfigurator
-from tools.hasher.dhash import DHash
+from tools.comparer.img_comparer.hasher.dhash import DHash
 
 
 

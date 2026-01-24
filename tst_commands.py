@@ -4,11 +4,10 @@ from pathlib import Path
 from const_utils.commands import Commands
 from fileManager import FileManager
 
-script_path = Path(__file__).parent / "fileManager.py"
 
 MAPPING = {
     Commands.slice: [
-        str(script_path),
+        "fileManager.py",
         "slice",
         "./media/",
         "./media/imgs/",
