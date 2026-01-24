@@ -13,7 +13,8 @@ from tools.comparer.img_comparer.img_comparer import ImageComparer
 class DedupOperation(FileOperation):
     def __init__(self, **kwargs):
         """
-        feat
+        find duplicate files in source folder
+        :param kwargs: params from CLI
         """
         super().__init__(**kwargs)
         self.mapping = {
@@ -23,6 +24,7 @@ class DedupOperation(FileOperation):
         self.filetype = kwargs.get("filetype", DefaultValues.image)
         self.action = kwargs.get("action", DefaultValues.action)
         self.method = kwargs.get("method", DefaultValues.dhash)
+        self.remove = kwargs.get("remove", DefaultValues.remove)
         self.comparer: ImageComparer = self.mapping[self.filetype](
             method_name=self.method,
             log_path = self.log_path,
@@ -46,16 +48,29 @@ class DedupOperation(FileOperation):
             help=HelpStrings.method,
             default=DefaultValues.dhash
         )
+        parser.add_argument(
+            Arguments.remove, Arguments.rm,
+            help=HelpStrings.remove,
+            action="store_true"
+        )
+
 
     def do_task(self):
+        """
+        find duplicate files in source folder, ask user to delete them if remove
+        """
         duplicates = self.comparer.compare(self.files_for_task)
         self.logger.info(f"Found {len(duplicates)} duplicates in {len(self.files_for_task)} files")
 
-        if len(duplicates) > 0:
-            user_choice = input("for deleting founded duplicate files type 'delete': ")
-            if user_choice.lower() in DefaultValues.confirm_choice:
+        if len(duplicates) > 0 and self.confirm_removing():
                 self.remove_duplicates(duplicates)
 
+    def confirm_removing(self) -> bool:
+        """check if user wants to remove duplicates"""
+        if not self.remove:
+            user_choice = input("for deleting founded duplicate files type 'delete': ")
+            return user_choice.lower() in DefaultValues.confirm_choice
+        return True
 
     def remove_duplicates(self, duplicates: List[Path]) -> None:
         """
