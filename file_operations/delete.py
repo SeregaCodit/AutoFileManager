@@ -1,12 +1,10 @@
 import argparse
-import shutil
 
-from const_utils.arguments import Arguments
-from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
+from file_operations.file_remover import FileRemoverMixin
 
 
-class DeleteOperation(FileOperation):
+class DeleteOperation(FileOperation, FileRemoverMixin):
     """Delete files that match the pattern"""
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser) -> None:
@@ -15,7 +13,4 @@ class DeleteOperation(FileOperation):
 
     def do_task(self):
         """Delete files that match the pattern"""
-        for file_path in self.files_for_task:
-            if file_path.is_file():
-                file_path.unlink(missing_ok=True)
-                self.logger.info(f"deleted {file_path}")
+        self._remove_all(self.files_for_task)
