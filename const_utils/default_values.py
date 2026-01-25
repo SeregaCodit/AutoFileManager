@@ -24,3 +24,4 @@ class DefaultValues:
     hash_threshold: str = 10
     max_percentage: int = 100
     confirm_choice: tuple = ("delete", "вудуеу", "yes", "y", "true", "t", "1")
+    core_size: int = 16
