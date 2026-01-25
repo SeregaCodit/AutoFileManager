@@ -18,8 +18,11 @@ class BaseHasher(ABC):
         log_path: Path = DefaultValues.log_path,
     ):
         """
+
         :param hash_type: type of hash algorithm to use
-        :param core_size: size of resizing image in algorithm, core_size will be square of this value
+        :param core_size: size of resizing image in algorithm, hash_size will be square of this value.
+            biggest core size makes details at image more important. So with equal threshold with different core size
+            same images can be duplicates or not duplicates
         :param threshold: threshold in percentage for hemming distance. Files that have lower hemming distance will be
             considered duplicates.
         :param log_path: path to log file

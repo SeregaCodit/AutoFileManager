@@ -31,6 +31,8 @@ class HelpStrings:
                       f" have a different information. Using Hemming distance for *hash methods")
     core_size: str = (f"Default: {DefaultValues.core_size}.\n"
                       f"The size at which the image will be resized to square. This means that the actual hash size "
-                      f"will be equal to the square of the kernel size."
+                      f"will be equal to the square of the kernel size. Biggest core size makes details at image more"
+                      f" important. So with equal threshold with different core size same images can be duplicates or "
+                      f"not duplicates"
 
     )
