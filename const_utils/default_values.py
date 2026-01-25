@@ -26,3 +26,4 @@ class DefaultValues:
     confirm_choice: tuple = ("delete", "вудуеу", "yes", "y", "true", "t", "1")
     core_size: int = 16
     max_workers: int = 4
+    cache_file_path: Path = Path("./cache")
