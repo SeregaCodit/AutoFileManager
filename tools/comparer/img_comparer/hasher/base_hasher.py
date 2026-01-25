@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from linecache import cache
 from pathlib import Path
 from typing import Union, Tuple, Dict, List, Set
 from concurrent.futures import ProcessPoolExecutor
@@ -8,6 +9,7 @@ import numpy as np
 
 from logger.logger import LoggerConfigurator
 from const_utils.default_values import DefaultValues
+from tools.cache import CacheIO
 
 
 class BaseHasher(ABC):
@@ -18,6 +20,7 @@ class BaseHasher(ABC):
         core_size: Union[Tuple[int, int], int] = DefaultValues.core_size,
         threshold: int = DefaultValues.hash_threshold,
         log_path: Path = DefaultValues.log_path,
+        cache_io: CacheIO = CacheIO()
     ):
         """
 
@@ -37,6 +40,7 @@ class BaseHasher(ABC):
             log_path=Path(log_path) / f"{self.__class__.__name__}.log" if log_path else None,
             log_level=DefaultValues.log_level
         )
+        self.cache_io = cache_io
     @staticmethod
     @abstractmethod
     def compute_hash(image_path: Path, core_size: int = DefaultValues.core_size) -> np.ndarray:
@@ -53,7 +57,20 @@ class BaseHasher(ABC):
         :param image_paths: list of images paths
         creating a dict with image path's and their hashes
         """
-        self.logger.info(f"Building hashmap in parallel using {DefaultValues.max_workers} workers for {len(image_paths)} images...")
+        image_count = len(image_paths)
+        filename = self.cache_io.generate_cache_filename(
+            image_paths[0].parent.resolve(),
+            hash_type=self.hash_type,
+            core_size=self.core_size)
+
+        cache_file_name = DefaultValues.cache_file_path / filename
+        cache_file_name.parent.mkdir(parents=True, exist_ok=True)
+
+        hash_map = self.cache_io.load(cache_file_name)
+        if hash_map:
+            return hash_map
+
+        self.logger.info(f"Building hashmap in parallel using {DefaultValues.max_workers} workers for {image_count} images...")
         hash_func = partial(self.__class__.compute_hash, core_size=self.core_size)
 
         with ProcessPoolExecutor(max_workers=DefaultValues.max_workers) as executor:
@@ -63,7 +80,9 @@ class BaseHasher(ABC):
             path: h for path, h in zip(image_paths, hashes)
             if h is not None
         }
-        self.logger.info(f"Successfully hashed {len(hash_map)} out of {len(image_paths)} images")
+
+        self.logger.info(f"Successfully hashed {len(hash_map)} out of {image_count} images")
+        self.cache_io.save(hash_map, cache_file_name)
         return hash_map
 
     def find_duplicates(self, hashmap: Dict[Path, np.ndarray]) -> List[Path]:
@@ -146,12 +165,9 @@ class BaseHasher(ABC):
             self.logger.error(f"threshold must be real number, got {type(value)}")
             raise TypeError(f"threshold must be float, got {type(value)}")
 
-        if 0 > value > DefaultValues.max_percentage:
+        if not (0 <= value <= DefaultValues.max_percentage):
             self.logger.error(f"threshold must be between 0 and 100, got {value}")
             raise ValueError(f"threshold must be between 0 and 100, got {type(value)}")
 
         hash_sqr = self.core_size * self.core_size
         self._threshold = int(hash_sqr * (value / DefaultValues.max_percentage))
-
-
-
