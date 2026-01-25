@@ -13,19 +13,19 @@ class BaseHasher(ABC):
     def __init__(
         self,
         hash_type: str = DefaultValues.dhash,
-        hash_size: Union[Tuple[int, int], int] = 16,
+        core_size: Union[Tuple[int, int], int] = 16,
         threshold: int = 10,
         log_path: Path = DefaultValues.log_path,
     ):
         """
         :param hash_type: type of hash algorithm to use
-        :param hash_size: size of resizing image in algorithm, hash_size will be square of this value
+        :param core_size: size of resizing image in algorithm, core_size will be square of this value
         :param threshold: threshold in percentage for hemming distance. Files that have lower hemming distance will be
             considered duplicates.
         :param log_path: path to log file
         """
         self.hash_type = hash_type
-        self.hash_size = hash_size
+        self.core_size = core_size
         self.threshold = threshold
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
@@ -83,25 +83,25 @@ class BaseHasher(ABC):
         return list(duplicates)
 
     @property
-    def hash_size(self) -> int:
-        return self._hash_size
+    def core_size(self) -> int:
+        return self._core_size
 
-    @hash_size.setter
-    def hash_size(self, value: Union[Tuple[int, int], int, float, str]) -> None:
+    @core_size.setter
+    def core_size(self, value: Union[Tuple[int, int], int, float, str]) -> None:
         """
         stups hash size, converts into int type
         :param value: size of hash. Using for resizing an image
         """
         if isinstance(value, int):
-            self._hash_size = value
+            self._core_size = value
         elif isinstance(value, (float, str)):
             try:
-                self._hash_size = int(value)
+                self._core_size = int(value)
             except TypeError:
                 self.logger.error(f"hash size must be int, got {type(value)}")
                 raise TypeError(f"hash size must be int, got {type(value)}")
         elif isinstance(value, tuple):
-            self._hash_size = value[0] if value[0] >= 0 else value[1]
+            self._core_size = value[0] if value[0] >= 0 else value[1]
         else:
             self.logger.error(f"hash size must be int or tuple, got {type(value)}")
             raise TypeError(f"hash size must be int or tuple, got {type(value)}")
@@ -130,7 +130,7 @@ class BaseHasher(ABC):
             self.logger.error(f"threshold must be between 0 and 100, got {value}")
             raise ValueError(f"threshold must be between 0 and 100, got {type(value)}")
 
-        hash_sqr = self.hash_size * self.hash_size
+        hash_sqr = self.core_size * self.core_size
         self._threshold = int(hash_sqr * (value / DefaultValues.max_percentage))
 
 
