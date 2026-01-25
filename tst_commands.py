@@ -36,8 +36,8 @@ MAPPING = {
     Commands.dedup: [
         "fileManager.py",
         "dedup",
-        # "./media/imgs/",
-        "/mnt/qnap/Staff/Naumenko/NotTheSkynet/img_dataset/",
+        "./media/imgs/",
+        # "/mnt/qnap/Staff/Naumenko/NotTheSkynet/img_dataset/",
         # "/home/pivden/PycharmProjects/yoloTrainer/saved_imgs/",
         "-p", ".jpg", ".png",
         "--filetype", "image",
