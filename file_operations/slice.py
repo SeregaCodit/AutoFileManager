@@ -1,14 +1,14 @@
 import argparse
-from pathlib import Path
 
 from const_utils.arguments import Arguments
 from const_utils.default_values import DefaultValues
 from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
+from file_operations.file_remover import FileRemoverMixin
 from tools.video_slicer import VideoSlicer
 
 
-class SliceOperation(FileOperation):
+class SliceOperation(FileOperation, FileRemoverMixin):
     """Slice the files that match a pattern from source directory to target directory"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -53,13 +53,7 @@ class SliceOperation(FileOperation):
                     continue
 
                 if self.remove:
-                    self.remove_source(file_path)
-
-
-    def remove_source(self,source_file: Path) -> None:
-        """delete source file that just was sliced"""
-        source_file.unlink(missing_ok=True)
-        self.logger.info(f"{source_file} deleted")
+                    self._remove_all(file_path)
 
     @property
     def step_sec(self) -> float:
