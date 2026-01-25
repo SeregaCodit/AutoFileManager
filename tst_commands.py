@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+from const_utils.arguments import Arguments
 from const_utils.commands import Commands
 from fileManager import FileManager
 
@@ -20,7 +21,7 @@ MAPPING = {
     Commands.delete: [
         "fileManager.py",
         "delete",
-        "./media/imgs/",
+        "./media/imgs_new/",
         "-p", ".jpg",
     ],
     Commands.move: [
@@ -28,7 +29,7 @@ MAPPING = {
         "move",
         "./media/imgs/",
         "./media/imgs_new/",
-        "-p", ".jpg",
+        "-p", ".jpg", ".png",
         "-r",
         "-s", "30"
     ],
@@ -43,6 +44,10 @@ MAPPING = {
 }
 
 if __name__ == "__main__":
-    sys.argv = MAPPING[Commands.delete]
+    MAPPING[Commands.dedup].append(Arguments.core_size)
+    MAPPING[Commands.dedup].append("64")
+
+
+    sys.argv = MAPPING[Commands.dedup]
     app = FileManager()
     app.execute()

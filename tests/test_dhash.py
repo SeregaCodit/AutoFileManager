@@ -1,5 +1,8 @@
+import io
+import os
+import tempfile
 from pathlib import Path
-
+from PIL import Image
 import cv2
 import numpy as np
 import pytest
@@ -25,6 +28,21 @@ def create_test_image(tmp_path):
         cv2.imwrite(str(img_path), img)
         return img_path
     return _generate
+
+
+def create_temp_img_file(color=(255, 0, 0), quality=100, noise=False):
+    """Створює тимчасовий файл зображення і повертає шлях до нього."""
+    # Створюємо тимчасовий файл з розширенням .jpg
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    img = Image.new('RGB', (100, 100), color)
+
+    if noise:
+        img.putpixel((10, 10), (0, 255, 0))
+        img.putpixel((50, 50), (255, 255, 255))
+
+    img.save(temp_file.name, format="JPEG", quality=quality)
+    temp_file.close()
+    return temp_file.name
 
 @pytest.mark.parametrize("input_value, expected_vals", [
     (0.1, 0),    # int(0.1) * (16*16) = 0
@@ -179,3 +197,48 @@ def test_find_duplicates_logic_flow(hasher):
     assert Path("B.jpg") in result
     assert Path("C.jpg") in result
     assert Path("A.jpg") not in result
+
+
+def test_identical_with_different_compression():
+    # 1. Створюємо оригінал та стиснену копію як реальні файли
+    path_orig = Path(create_temp_img_file(color=(100, 150, 200), quality=100))
+    path_comp = Path(create_temp_img_file(color=(100, 150, 200), quality=10))  # низька якість
+
+    hasher = DHash(threshold=5, core_size=8)
+
+    try:
+        hash_map = {
+            path_orig: hasher.compute_hash(path_orig),
+            path_comp: hasher.compute_hash(path_comp),
+        }
+        assert hasher.find_duplicates(hash_map), "Мали бути дублікатами при малому core_size"
+    finally:
+        # Видаляємо тимчасові файли
+        if os.path.exists(path_orig): os.remove(path_orig)
+        if os.path.exists(path_comp): os.remove(path_comp)
+
+@pytest.mark.parametrize(
+    "input_value, expected_value",
+    [
+        (8, False), # images should be duplicates because details become unimportant
+        (32, True)# images should not be duplicates because details become more important
+    ]
+)
+def test_different_images_with_similar_composition(input_value, expected_value):
+    # Створюємо два різних зображення (різні кольори)
+    path_img1 = Path(create_temp_img_file(color=(0, 0, 255), noise=True))  # Синє з шумом
+    path_img2 = Path(create_temp_img_file(color=(0, 0, 255), noise=False))  # Просто синє
+
+    hasher = DHash(threshold=2, core_size=int(input_value))
+
+    try:
+        hash_map = {
+            path_img1: hasher.compute_hash(path_img1),
+            path_img2: hasher.compute_hash(path_img2),
+        }
+
+        result = hasher.find_duplicates(hash_map)
+        assert bool(result) == expected_value
+    finally:
+        if os.path.exists(path_img1): os.remove(path_img1)
+        if os.path.exists(path_img2): os.remove(path_img2)
