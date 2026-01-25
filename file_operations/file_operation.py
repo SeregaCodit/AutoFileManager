@@ -31,7 +31,7 @@ class FileOperation(ABC):
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
             log_level=log_level,
-            log_path=Path(self.log_path) / f"{log_file}.log" if self.log_path else None,
+            log_path=Path(self.log_path) / f"{log_file}.log" if self.log_path else None
         )
         self.logger.info(f"Started with parameters: {kwargs}")
 
