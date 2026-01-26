@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union, Tuple
 
 from const_utils.copmarer import Constants
+from const_utils.default_values import DefaultValues
 from logger.logger import LoggerConfigurator
 from tools.comparer.img_comparer.hasher.dhash import DHash
 
@@ -12,8 +13,9 @@ class ImageComparer:
             self,
             method_name: str = Constants.phash,
             log_path: Union[Path, None] = None,
-            threshold_percentage: int = 10,
-            core_size: int = 16
+            threshold_percentage: int = DefaultValues.hash_threshold,
+            core_size: int = DefaultValues.core_size,
+            n_jobs: int = DefaultValues.n_jobs,
     ):
         """
         An orchestrator for comparing two images using principial different algorithms.
@@ -29,6 +31,7 @@ class ImageComparer:
         self.method = self.method_mapping[method_name](
             core_size=core_size,
             threshold=threshold_percentage,
+            n_jobs=n_jobs
         )
 
         self.logger = LoggerConfigurator.setup(

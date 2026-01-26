@@ -1,4 +1,5 @@
 import io
+import multiprocessing
 import os
 import tempfile
 from pathlib import Path
@@ -6,6 +7,7 @@ from PIL import Image
 import cv2
 import numpy as np
 import pytest
+from unittest.mock import patch
 
 from tools.comparer.img_comparer.hasher.dhash import DHash
 
@@ -81,24 +83,21 @@ def test_core_size(input_value, expected_val):
     assert hasher.core_size == expected_val
 
 
-# @pytest.mark.parametrize("input_value, expected_val", [
-#     # equal hashes
-#     ((np.array([0, 1, 0, 1]), np.array([0, 1, 0, 1])), 0),
-#     # dist == 1
-#     ((np.array([0, 0, 0, 1]), np.array([0, 1, 0, 1])), 1),
-#     # dist == 2
-#     ((np.array([0, 0, 0, 0]), np.array([0, 1, 0, 1])), 2),
-#     # dist == 3
-#     ((np.array([1, 0, 1, 1]), np.array([0, 0, 0, 0])), 3),
-#     # dist == 4
-#     ((np.array([0, 0, 0, 0]), np.array([1, 1, 1, 1])), 4)
-# ])
-# def test_calculate_distance(hasher, input_value, expected_val):
-#     hash1, hash2 = input_value
-#     dist = hasher.calculate_distance(hash1, hash2)
-#
-#     assert isinstance(dist, int)
-#     assert dist == expected_val
+@pytest.mark.parametrize("input_value, expected_value", [
+    (100, multiprocessing.cpu_count() - 1 if multiprocessing.cpu_count() > 1 else 1),
+    (0, 1),
+    (-5, 1),
+    ("4", 4 if multiprocessing.cpu_count() > 4 else multiprocessing.cpu_count() - 1),
+])
+def test_n_jobs_clamping(hasher, input_value, expected_value):
+    hasher.n_jobs = input_value
+
+    assert isinstance(hasher.n_jobs, int)
+    assert hasher.n_jobs == expected_value
+
+# def test_n_jobs_invalid_type(hasher):
+#     with pytest.raises(ValueError):
+#         hasher.n_jobs = "not_a_number"
 
 @pytest.mark.parametrize("input_value, expected_val", [
     (16, 16 * 16),

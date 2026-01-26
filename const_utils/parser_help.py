@@ -34,5 +34,6 @@ class HelpStrings:
                       f"will be equal to the square of the kernel size. Biggest core size makes details at image more"
                       f" important. So with equal threshold with different core size same images can be duplicates or "
                       f"not duplicates"
-
     )
+    n_jobs: str = (f"Default: {DefaultValues.n_jobs}.\n"
+                   f"A count of workers for CPU Bound tasks like a hashmap building")

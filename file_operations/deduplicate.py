@@ -30,7 +30,8 @@ class DedupOperation(FileOperation, FileRemoverMixin):
             method_name=self.method,
             log_path = self.log_path,
             threshold_percentage=int(kwargs.get("threshold", DefaultValues.hash_threshold)),
-            core_size = int(kwargs.get("core_size", DefaultValues.core_size))
+            core_size = int(kwargs.get("core_size", DefaultValues.core_size)),
+            n_jobs = int(kwargs.get("n_jobs", DefaultValues.n_jobs))
         )
 
     @staticmethod
@@ -59,6 +60,11 @@ class DedupOperation(FileOperation, FileRemoverMixin):
             Arguments.core_size,
             help=HelpStrings.core_size,
             default=DefaultValues.core_size
+        )
+        parser.add_argument(
+            Arguments.n_jobs,
+            help=HelpStrings.n_jobs,
+            default=DefaultValues.n_jobs
         )
 
 

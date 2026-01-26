@@ -1,3 +1,4 @@
+import multiprocessing
 from abc import ABC, abstractmethod
 from linecache import cache
 from pathlib import Path
@@ -20,7 +21,8 @@ class BaseHasher(ABC):
         core_size: Union[Tuple[int, int], int] = DefaultValues.core_size,
         threshold: int = DefaultValues.hash_threshold,
         log_path: Path = DefaultValues.log_path,
-        cache_io: CacheIO = CacheIO()
+        cache_io: CacheIO = CacheIO(),
+        n_jobs: int = DefaultValues.n_jobs
     ):
         """
 
@@ -32,25 +34,21 @@ class BaseHasher(ABC):
             considered duplicates.
         :param log_path: path to log file
         """
-        self.hash_type = hash_type
-        self.core_size = core_size
-        self.threshold = threshold
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
             log_path=Path(log_path) / f"{self.__class__.__name__}.log" if log_path else None,
             log_level=DefaultValues.log_level
         )
+
+        self.hash_type = hash_type
+        self.core_size = core_size
+        self.threshold = threshold
         self.cache_io = cache_io
+        self.n_jobs = n_jobs
     @staticmethod
     @abstractmethod
     def compute_hash(image_path: Path, core_size: int = DefaultValues.core_size) -> np.ndarray:
         pass
-
-    # @staticmethod
-    # def calculate_distance(hash1: np.ndarray, hash2: np.ndarray) -> int:
-    #     """calculate hemming distance between two image hashes"""
-    #     hemming_distance = np.count_nonzero(hash1 != hash2)
-    #     return int(hemming_distance)
 
     def get_hashmap(self, image_paths: Tuple[Path]) -> Dict[Path, np.ndarray]:
         """
@@ -70,10 +68,10 @@ class BaseHasher(ABC):
         if hash_map:
             return hash_map
 
-        self.logger.info(f"Building hashmap in parallel using {DefaultValues.max_workers} workers for {image_count} images...")
+        self.logger.info(f"Building hashmap in parallel using {self.n_jobs} workers for {image_count} images...")
         hash_func = partial(self.__class__.compute_hash, core_size=self.core_size)
 
-        with ProcessPoolExecutor(max_workers=DefaultValues.max_workers) as executor:
+        with ProcessPoolExecutor(max_workers=self.n_jobs) as executor:
             hashes = list(executor.map(hash_func, image_paths))
 
         hash_map = {
@@ -171,3 +169,38 @@ class BaseHasher(ABC):
 
         hash_sqr = self.core_size * self.core_size
         self._threshold = int(hash_sqr * (value / DefaultValues.max_percentage))
+
+    @property
+    def n_jobs(self) -> int:
+        return self._n_jobs
+
+    @n_jobs.setter
+    def n_jobs(self, value: Union[int, float, str]) -> None:
+        """
+            safe setting n_jobs
+        """
+        # check types and try to int
+        if not isinstance(value, int):
+            try:
+                value = int(float(value))
+            except TypeError:
+                self.logger.error(f"n_jobs must be int, got {type(value)}")
+                raise TypeError(f"n_jobs must be int, got {type(value)}")
+            except ValueError:
+                self.logger.error(f"n_jobs must be real number, got {type(value)}")
+                raise ValueError(f"n_jobs must be real number, got {type(value)}")
+
+        # check cores and control that n_jobs can be set
+        cores = multiprocessing.cpu_count()
+
+        if value <= 1:
+            self.logger.warning(f"n_jobs must be greater than 1, got {value}")
+            value = 1
+        elif 1 < cores <= value:
+            self.logger.warning(f"n_jobs must be less than {cores}, got {value}")
+            value = cores - 1
+        elif cores == 1 and value != 1:
+            value = 1
+
+        self._n_jobs = value
+        self.logger.info(f"n_jobs set to {value}")

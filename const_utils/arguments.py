@@ -26,3 +26,4 @@ class Arguments:
     a: str = "-a"
     threshold: str = "--threshold"
     core_size: str = "--core_size"
+    n_jobs: str = "--n_jobs"
