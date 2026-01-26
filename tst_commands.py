@@ -30,7 +30,7 @@ MAPPING = {
         "./media/imgs/",
         "./media/imgs_new/",
         "-p", ".jpg", ".png",
-        "-r",
+        # "-r",
         "-s", "30"
     ],
     Commands.dedup: [
@@ -48,8 +48,7 @@ MAPPING = {
 if __name__ == "__main__":
     MAPPING[Commands.dedup].append(Arguments.core_size)
     MAPPING[Commands.dedup].append("16")
-
-
+    #fixme 2026-01-26 19:02:48 [INFO] DedupOperation: Found 57 duplicates in 8 files
     sys.argv = MAPPING[Commands.dedup]
     app = FileManager()
     app.execute()

@@ -4,21 +4,22 @@ from pathlib import Path
 from typing import Union, Dict, BinaryIO
 import numpy as np
 
-from const_utils.default_values import DefaultValues
+from const_utils.default_values import AppSettings
 from file_operations.file_remover import FileRemoverMixin
 from logger.logger import LoggerConfigurator
 from logger.logger_protocol import LoggerProtocol
 
 
 class CacheIO:
-    def __init__(self):
+    def __init__(self, settings: AppSettings):
         """
         saving and reading cache files for faster loading data
         """
+        self.settings = settings
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
-            log_path=Path(DefaultValues.log_path) / f"{self.__class__.__name__}.log",
-            log_level=DefaultValues.log_level
+            log_path=Path(self.settings.log_path) / f"{self.__class__.__name__}.log",
+            log_level=self.settings.log_level
         )
 
 
