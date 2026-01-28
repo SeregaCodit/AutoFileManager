@@ -1,7 +1,7 @@
 import json
 import multiprocessing
 
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,6 +36,7 @@ class AppSettings(BaseSettings):
     core_size: int = Field(default=8, ge=8) # чи можна вказати що це має бути ступінь двійки?
     n_jobs: int = Field(default=2, ge=1, le=multiprocessing.cpu_count())
     cache_file_path: Path = Field(default=Path("./cache"))
+    cache_name: Optional[Path] = Field(default=None)
 
     @field_validator('core_size')
     @classmethod
@@ -64,23 +65,3 @@ class AppSettings(BaseSettings):
                 print(f"Warning: {config_path} is corrupted. Using defaults.")
 
         return cls(**data)
-
-# @dataclass
-# class DefaultValues:
-#     """Default values of positional arguments"""
-#
-#     remove: bool = False
-#     pattern: tuple = ()
-#     sleep: Union[int, bool] = 60
-#     suffix: str = ".jpg"
-#     step_sec: float = 600
-#     log_path: Path = Path("./log")
-#     log_level: str = LevelMapping.info
-#     filetype: str = "image"
-#     method: str = "dhash"
-#     hash_threshold: str = 10
-#     max_percentage: int = 100
-#     confirm_choice: tuple = ("delete", "вудуеу", "yes", "y", "true", "t", "1")
-#     core_size: int = 16
-#     n_jobs: int = 2
-#     cache_file_path: Path = Path("./cache")

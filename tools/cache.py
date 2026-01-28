@@ -1,7 +1,7 @@
 import hashlib
 import pickle
 from pathlib import Path
-from typing import Union, Dict, BinaryIO
+from typing import Union, Dict, BinaryIO, Optional
 import numpy as np
 
 from const_utils.default_values import AppSettings
@@ -11,6 +11,7 @@ from logger.logger_protocol import LoggerProtocol
 
 
 class CacheIO:
+    SUFFIX = ".pkl"
     def __init__(self, settings: AppSettings):
         """
         saving and reading cache files for faster loading data
@@ -47,10 +48,19 @@ class CacheIO:
 
         self.logger.info(f"Cache file {cache_file} saved")
 
-    @staticmethod
-    def generate_cache_filename(source_path: Path, hash_type: str, core_size: int) -> str:
-        """generate cache filename from source_path"""
-        abs_path = str(source_path.resolve())
-        path_hash = hashlib.md5(abs_path.encode('utf-8')).hexdigest()
-        return f"cache_{path_hash}_{hash_type}_s{core_size}.pkl"
+    @classmethod
+    def generate_cache_filename(cls, source_path: Path, hash_type: str, core_size: int, cache_name: Optional[Path]) -> str:
+        """generate cache filename from source_path """
+        suffix = f"{hash_type}_s{core_size}{cls.SUFFIX}"
+        if cache_name is None:
+            abs_path = str(source_path.resolve())
+            path_hash = hashlib.md5(abs_path.encode('utf-8')).hexdigest()
+            folder_name = str(source_path.name.replace(' ', '_').strip("."))[:30]
+            return f"cache_{path_hash}_d{folder_name}{suffix}"
+        else:
+            cache_name = str(cache_name).replace(" ", "_").strip(".")
+            if cache_name.endswith(cls.SUFFIX):
+                cache_name = cache_name[:-len(cls.SUFFIX)]
 
+            cache_name = f"{cache_name}_{suffix}"
+            return cache_name

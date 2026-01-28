@@ -42,13 +42,13 @@ MAPPING = {
         "-p", ".jpg", ".png",
         "--filetype", "image",
         "--threshold", "10",
+        "--cache_name", "test1"
     ]
 }
 
 if __name__ == "__main__":
     MAPPING[Commands.dedup].append(Arguments.core_size)
     MAPPING[Commands.dedup].append("16")
-    #fixme 2026-01-26 19:02:48 [INFO] DedupOperation: Found 57 duplicates in 8 files
     sys.argv = MAPPING[Commands.dedup]
     app = FileManager()
     app.execute()

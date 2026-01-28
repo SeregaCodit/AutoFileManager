@@ -22,9 +22,7 @@ class DedupOperation(FileOperation, FileRemoverMixin):
         self.filetype = kwargs.get("filetype", self.settings.filetype)
         self.method = kwargs.get("method", self.settings.method)
         self.remove = kwargs.get("remove", self.settings.remove)
-        self.comparer: ImageComparer = self.mapping[self.filetype](
-            self.settings
-        )
+        self.comparer: ImageComparer = self.mapping[self.filetype](self.settings)
 
     @staticmethod
     def add_arguments(settings: AppSettings, parser: argparse.ArgumentParser) -> None:
@@ -58,7 +56,11 @@ class DedupOperation(FileOperation, FileRemoverMixin):
             help=HelpStrings.n_jobs,
             default=settings.n_jobs
         )
-
+        parser.add_argument(
+            Arguments.cache_name,
+            help=HelpStrings.cache_name,
+            default=None
+        )
 
     def do_task(self):
         """
