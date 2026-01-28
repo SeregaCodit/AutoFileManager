@@ -37,6 +37,8 @@ class AppSettings(BaseSettings):
     n_jobs: int = Field(default=2, ge=1, le=multiprocessing.cpu_count())
     cache_file_path: Path = Field(default=Path("./cache"))
     cache_name: Optional[Path] = Field(default=None)
+    a_suffix: tuple = Field(default=(".xml", ))
+    a_source: Optional[Path] = Field(default=None)
 
     @field_validator('core_size')
     @classmethod
