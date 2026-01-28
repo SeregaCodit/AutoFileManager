@@ -17,8 +17,9 @@ class AppSettings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_prefix="APP_",
-        json_file=Constants.config_file,
-        extra="ignore"
+        # json_file=Constants.config_file,
+        extra="ignore",
+        validate_assignment=True
     )
 
     remove: bool = Field(default=False)
