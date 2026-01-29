@@ -12,8 +12,15 @@ from file_operations.file_remover import FileRemoverMixin
 
 class CleanAnnotationsOperation(FileOperation, FileRemoverMixin):
     def __init__(self, **kwargs):
+        """
+        Cleans orphan annotations from same or different paths with images.
+        Unique args:
+        a_source: Path - a path to annotations directory. If None - will be set as source_directory value
+        a_suffix: Tuple[str, ...] - Pattern for annotations file suffix
+        """
         super().__init__(**kwargs)
         self.a_source = self.settings.a_source
+
 
     @staticmethod
     def add_arguments(settings: AppSettings, parser: argparse.ArgumentParser) -> None:
@@ -54,6 +61,7 @@ class CleanAnnotationsOperation(FileOperation, FileRemoverMixin):
 
     @a_source.setter
     def a_source(self, value: Union[Path, str, None]) -> None:
+        """setter for a_source, it might be set to Path type, or rise Type error """
         if isinstance(value, Path):
             self._a_source = value
         elif isinstance(value, str):
