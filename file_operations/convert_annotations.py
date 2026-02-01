@@ -17,6 +17,8 @@ class ConvertAnnotationsOperation(FileOperation):
             (".xml", "yolo") : VocYOLOConverter
         }
         self.converter = self.converter_mapping[(self.pattern[0], self.destination_type)]()
+        self.n_jobs = kwargs.get('n_jobs', 1)
+
 
     @staticmethod
     def add_arguments(settings: AppSettings, parser: argparse.ArgumentParser) -> None:
@@ -32,18 +34,20 @@ class ConvertAnnotationsOperation(FileOperation):
 
 
     def do_task(self):
-        for file_path in self.files_for_task:
-            if file_path.is_file():
-                converted_objects = self.converter.convert(file_path=file_path)
-                converted_file_path = self.target_directory / (file_path.stem + self.converter.DESTINATION_FORMAT)
-
-                self.converter.writer.write(data=converted_objects, file_path=converted_file_path)
-                self.logger.info(
-                    f"Converted {file_path} to {converted_file_path}"
-                )
-
-        classes_file = Path(self.target_directory) / ("classes" + self.converter.DESTINATION_FORMAT)
-        self.converter.writer.write(data=self.converter.objects, file_path=classes_file)
+        # for file_path in self.files_for_task:
+        #     if file_path.is_file():
+        #         converted_objects = self.converter.convert(file_path=file_path)
+        #         converted_file_path = self.target_directory / (file_path.stem + self.converter.DESTINATION_FORMAT)
+        #
+        #         self.converter.writer.write(data=converted_objects, file_path=converted_file_path)
+        #         self.logger.info(
+        #             f"Converted {file_path} to {converted_file_path}"
+        #         )
+        #
+        # classes_file = Path(self.target_directory) / ("classes" + self.converter.DESTINATION_FORMAT)
+        # self.logger.info(f"Writing classes to {classes_file}")
+        # self.converter.writer.write(data=self.converter.objects, file_path=classes_file)
+        self.converter.convert(self.files_for_task, self.target_directory, self.n_jobs)
 
 
 

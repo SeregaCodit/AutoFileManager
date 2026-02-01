@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 from logger.log_level_mapping import LevelMapping
 from logger.logger import LoggerConfigurator
@@ -27,14 +27,10 @@ class BaseConverter(ABC):
             log_level=log_level,
             log_path=Path(log_path) / f"{self.__class__.__name__}.log" if log_path else None
         )
-        
+
 
     @abstractmethod
-    def read(self, source_path: str) -> str:
-        pass
-
-    @abstractmethod
-    def convert(self, file_path: Path) -> str:
+    def convert(self, file_paths: Tuple[Path], target_path: Path, n_jobs: int = 1) -> None:
         pass
     
     @property
