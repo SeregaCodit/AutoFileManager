@@ -6,14 +6,20 @@ from logger.log_level_mapping import LevelMapping
 from logger.logger import LoggerConfigurator
 from tools.annotation_converter.reader.base import BaseReader
 from tools.annotation_converter.reader.voc import XMLReader
+from tools.annotation_converter.writer.yolo import YoloWriter
 
 
 class BaseConverter(ABC):
     def __init__(self, log_level: str = LevelMapping.debug, log_path: Optional[Path] = None):
 
         self._reader: Optional[BaseReader] = None
+        self._writer: Optional[YoloWriter] = None
         self.reader_mapping = {
             ".xml": XMLReader,
+        }
+
+        self.writer_mapping = {
+            ".txt": YoloWriter,
         }
 
         self.logger = LoggerConfigurator.setup(

@@ -37,9 +37,13 @@ class ConvertAnnotationsOperation(FileOperation):
                 converted_objects = self.converter.convert(file_path=file_path)
                 converted_file_path = self.target_directory / (file_path.stem + self.converter.DESTINATION_FORMAT)
 
+                self.converter.writer.write(data=converted_objects, file_path=converted_file_path)
                 self.logger.info(
                     f"Converted {file_path} to {converted_file_path}"
                 )
+
+        classes_file = Path(self.target_directory) / ("classes" + self.converter.DESTINATION_FORMAT)
+        self.converter.writer.write(data=self.converter.objects, file_path=classes_file)
 
 
 

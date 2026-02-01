@@ -1,6 +1,5 @@
 from pathlib import Path
-
-from const_utils.default_values import AppSettings
+from typing import Optional, List
 from tools.annotation_converter.converter.base import BaseConverter
 
 
@@ -12,15 +11,15 @@ class VocYOLOConverter(BaseConverter):
 
         self.tolerance = tolerance
         self.reader = self.reader_mapping[self.TARGET_FORMAT]()
-        self.object_mapping: dict = {}
+        self.writer = self.writer_mapping[self.DESTINATION_FORMAT]()
+        self.classes: Optional[str] = None
         self.objects: list = list()
 
 
     def read(self, source: str) -> str:
         pass
 
-
-    def convert(self, file_path: Path) -> list:
+    def convert(self, file_path: Path) -> List[str]:
         data = self.reader.read(file_path)
         converted_objects = list()
 
@@ -47,17 +46,13 @@ class VocYOLOConverter(BaseConverter):
                 x_center = (xmin + xmax) / 2 / img_width
                 y_center = (ymin + ymax) / 2 / img_height
 
-                width, height, x_center, y_center = map(lambda x: round(x, self.tolerance), [width, height, x_center, y_center])
+                cords = map(lambda x: round(x, self.tolerance),
+                                                        [x_center, y_center, width, height])
 
-                converted_objects.append(
-                    dict(
-                        name=obj["name"],
-                        width=width,
-                        height=height,
-                        x_center=x_center,
-                        y_center=y_center,
-                    )
-                )
+
+                converted_data = map(lambda x: str(x), [self.objects.index(obj["name"])] + list(cords))
+                data_string = " ".join(converted_data)
+                converted_objects.append(data_string)
 
         return converted_objects
 
