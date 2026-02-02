@@ -21,7 +21,7 @@ Hamming distance with comparing image hash than threshold value. The threshold v
 ## How to use:
 clone git repository:
 
-    git clone https://github.com/SeregaCodit/AutoFileManager.git
+    git clone https://github.com/SeregaCodit/DataForge.git
 
 go to project directory:
 
@@ -48,7 +48,7 @@ for check the command usage and available arguments
 
 ## What else?
 
-For more comfortable using FileManager with multiple tasks you can create an .sh file or modify [strat_all_tasks.sh](https://github.com/SeregaCodit/AutoFileManager/blob/main/strat_all_tasks.sh) with list of your commands. And run all of them just by one simple command:
+For more comfortable using DataForge with multiple tasks you can create an .sh file or modify [strat_all_tasks.sh](https://github.com/SeregaCodit/AutoFileManager/blob/main/strat_all_tasks.sh) with list of your commands. And run all of them just by one simple command:
 
     bash path_to_file/start_all_tasks.sh
 
