@@ -12,15 +12,23 @@ from tools.annotation_converter.converter.yolo_voc_converter import YoloVocConve
 
 class ConvertAnnotationsOperation(FileOperation):
     def __init__(self, settings: AppSettings, **kwargs):
-        """converts annotation formats from pattern to destination. You Can use only one value of pattern at the time"""
+        """
+        Converts annotation formats from pattern to destination. You Can use only one value of pattern at the time
+        Params:
+            pattern: in this command pattern - must be a format ttype (e.g. yolo, voc)
+            destination_type: format type convert to
+            n_jobs: how many workers to run, max workers can be your CPU count minus 1 for system stability
+        """
         super().__init__(settings, **kwargs)
         self.destination_type = kwargs.get('destination_type')
         self.converter_mapping = {
             ("voc", "yolo") : VocYOLOConverter,
             ("yolo", "voc"): YoloVocConverter
         }
-        self.converter = self.converter_mapping[(self.pattern[0], self.destination_type)]()
-        self.pattern = self.converter.TARGET_FORMAT
+
+        mapping_key = (self.pattern[0], self.destination_type)
+        self.converter = self.converter_mapping[mapping_key](mapping_key[0], mapping_key[1])
+        self.pattern = self.converter.source_suffix
         self.n_jobs = kwargs.get('n_jobs', 1)
 
 
