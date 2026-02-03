@@ -50,6 +50,7 @@ MAPPING = {
         "./media/annotated/",
         "--dst", "./media/yolo_anns/",
         "-p", "yolo",
+        "--img_path", "./media/annotated/", # only for converting from yolo format
         "--destination-type", "voc"
     ]
 }

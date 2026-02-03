@@ -23,7 +23,8 @@ class BaseConverter(ABC):
             source_format: str,
             dest_format: str,
             log_level: str = LevelMapping.debug,
-            log_path: Optional[Path] = None
+            log_path: Optional[Path] = None,
+            **kwargs
     ):
 
         self.reader_mapping = {

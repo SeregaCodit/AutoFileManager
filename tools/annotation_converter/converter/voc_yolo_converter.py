@@ -12,13 +12,13 @@ from tools.annotation_converter.writer.base import BaseWriter
 
 class VocYOLOConverter(BaseConverter):
     CLASSES_FILE = "classes.txt"
-    def __init__(self, source_format, dest_format, tolerance: int = 6):
+    def __init__(self, source_format, dest_format, tolerance: int = 6, **kwargs):
         """
         :param tolerance: an int value that determines to which decimal place to round a converted in YOLO
             format coordinates. By default, it is 6 in YOLO format.
         :type tolerance: int
         """
-        super().__init__(source_format, dest_format)
+        super().__init__(source_format, dest_format, **kwargs)
 
         self.tolerance = tolerance
         self.objects: list = list()
