@@ -21,7 +21,7 @@ class YoloVocConverter(BaseConverter):
         """
         super().__init__(source_format, dest_format)
         self.objects: list = list()
-        self.class_mapping: Dict[str, int] = dict()
+        self.object_mapping: Dict[str, int] = dict()
 
     def convert(self, file_paths: Tuple[Path], target_path: Path, n_jobs: int = 1) -> None:
         classes_file = next((path for path in file_paths if path.name == self.CLASSES_FILE), self.DEFAULT_OBJ_NAME)
@@ -30,6 +30,7 @@ class YoloVocConverter(BaseConverter):
                 f"No classes file found at {target_path}, all classes will be annotated as '{self.DEFAULT_OBJ_NAME}'"
             )
 
+        self.object_mapping = self.reader.read(classes_file)
 
         print(file_paths)
         pass
