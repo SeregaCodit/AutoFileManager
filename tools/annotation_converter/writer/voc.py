@@ -8,12 +8,12 @@ class XMLWriter(BaseWriter):
         writes .xml annotations for Pascal VOC dataset.
     """
 
-    def write(self, data: dict, file_path: Path) -> dict:
+    def write(self, data: str, file_path: Path) -> dict:
         """
         writes .xml annotation file for Pascal VOC dataset to file_path.
             Params:
-                data: dict - a dict of annotation data
+                data: str - a string with xml annotation data
                 file_path: Path - path to annotation file
         """
-
-        pass
+        with open(file_path, "w") as file:
+            file.write(data)

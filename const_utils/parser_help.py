@@ -35,3 +35,5 @@ class HelpStrings:
                      " images")
     destination_type: str = "A type of destination annotation format"
     img_path: str = "Path to dataset images directory"
+    extensions: str = ("A tuple of file extensions that will be used as pattern for building file whitelists for "
+                       "converting from yolo to other formats")

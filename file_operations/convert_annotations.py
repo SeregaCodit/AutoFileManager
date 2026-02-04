@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Union
 
 from const_utils.arguments import Arguments
+from const_utils.commands import Commands
 from const_utils.default_values import AppSettings
 from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
@@ -23,7 +24,7 @@ class ConvertAnnotationsOperation(FileOperation):
         """
         super().__init__(settings, **kwargs)
         self.destination_type = kwargs.get('destination_type')
-        self.image_path = kwargs.get('img_path')
+        self.img_path = kwargs.get('img_path')
         self.converter_mapping = {
             ("voc", "yolo") : VocYOLOConverter,
             ("yolo", "voc"): YoloVocConverter
@@ -33,7 +34,8 @@ class ConvertAnnotationsOperation(FileOperation):
         self.converter: Union[BaseConverter.__subclasses__()] = self.converter_mapping[mapping_key](
             source_format=mapping_key[0],
             dest_format=mapping_key[1],
-            images_path=self.image_path,
+            extensions=kwargs.get('ext', self.settings.extensions),
+            img_path=self.img_path,
             labels_path=self.source_directory
         )
         self.pattern = self.converter.source_suffix
@@ -60,6 +62,12 @@ class ConvertAnnotationsOperation(FileOperation):
             Arguments.n_jobs,
             default=settings.n_jobs,
             help=HelpStrings.n_jobs
+        )
+        parser.add_argument(
+            Arguments.extensions,
+            nargs="+",
+            help=HelpStrings.extensions,
+            default=settings.extensions
         )
 
 

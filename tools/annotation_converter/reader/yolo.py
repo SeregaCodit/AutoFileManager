@@ -14,5 +14,5 @@ class TXTReader(BaseReader):
         with open(file_path, "r") as file:
             text = file.read()
 
-        data = {key: value for value, key in enumerate(text.split("\n")) if key}
+        data = {key: str(value) for value, key in enumerate(text.split("\n")) if key}
         return data
