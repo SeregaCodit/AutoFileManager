@@ -9,10 +9,26 @@ from tools.comparer.img_comparer.img_comparer import ImageComparer
 
 
 class DedupOperation(FileOperation, FileRemoverMixin):
+    """
+    An operation to find and remove visual duplicates in a dataset.
+
+    This class compares images in the source folder using hashing algorithms
+    (like dHash). It identifies similar images based on a similarity threshold
+    and can either delete them automatically or ask the user for confirmation.
+
+    Attributes:
+        filetype (str): The type of files to process (e.g., 'image').
+        method (str): The hashing method used for comparison (e.g., 'dhash').
+        remove (bool): If True, duplicates are deleted automatically without asking.
+        comparer (ImageComparer): The engine that performs the actual image comparison.
+    """
     def __init__(self, **kwargs):
         """
-        find duplicate files in source folder
-        :param kwargs: params from CLI
+        Initializes the deduplication operation.
+
+        Args:
+            **kwargs (dict): Parameters from the command line or settings, including
+                'filetype', 'method', 'threshold', and 'core_size'.
         """
         super().__init__(**kwargs)
         self.mapping = {
@@ -26,6 +42,13 @@ class DedupOperation(FileOperation, FileRemoverMixin):
 
     @staticmethod
     def add_arguments(settings: AppSettings, parser: argparse.ArgumentParser) -> None:
+        """
+        Defines CLI arguments for the deduplication task.
+
+        Args:
+            settings (AppSettings): Global configuration for default values.
+            parser (argparse.ArgumentParser): The parser to which arguments are added.
+        """
         parser.add_argument(
             Arguments.threshold,
             help=HelpStrings.threshold,
@@ -64,16 +87,30 @@ class DedupOperation(FileOperation, FileRemoverMixin):
 
     def do_task(self):
         """
-        find duplicate files in source folder, ask user to delete them if remove
+        Executes the deduplication process.
+
+        This method uses the 'ImageComparer' to find duplicates among the
+        collected files. If duplicates are found, it checks for user
+        confirmation (or uses the 'remove' flag) and deletes the files
+        using 'FileRemoverMixin'.
         """
         duplicates = self.comparer.compare(self.files_for_task)
-        self.logger.info(f"Found {len(duplicates)} duplicates in {len(self.files_for_task)} files")
+        duplicates_count = len(duplicates)
+        self.logger.info(f"Found {duplicates_count} duplicates in {len(self.files_for_task)} files")
 
-        if len(duplicates) > 0 and self.confirm_removing():
+        if duplicates_count > 0 and self.confirm_removing():
                 self._remove_all(duplicates)
 
     def confirm_removing(self) -> bool:
-        """check if user wants to remove duplicates"""
+        """
+        Checks if the operation has permission to delete the found duplicates.
+
+        If the 'remove' flag is not set, the method asks the user to type
+        'delete' in the console to proceed.
+
+        Returns:
+            bool: True if deletion is confirmed, False otherwise.
+        """
         if not self.remove:
             user_choice = input("for deleting founded duplicate files type 'delete': ")
             return user_choice.lower() in self.settings.confirm_choice
