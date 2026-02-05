@@ -12,8 +12,16 @@ from tools.annotation_converter.writer.base import BaseWriter
 
 
 class YoloVocConverter(BaseConverter):
+    """
+    A converter that transforms dataset annotations from YOLO (.txt) to Pascal VOC (.xml).
+
+    This class uses multiprocessing to handle large datasets efficiently. It links
+    text labels with their corresponding images to calculate absolute pixel coordinates.
+
+    Attributes:
+        CLASSES_FILE (str): Standard name for the file containing class names.
+    """
     CLASSES_FILE = "classes.txt"
-    DEFAULT_OBJ_NAME = "annotated_object"
     _worker_image_map = {}
     def __init__(
             self,
@@ -23,10 +31,13 @@ class YoloVocConverter(BaseConverter):
             **kwargs
     ):
         """
-        Convert annotations from YOLO (.txt format) to VOC (.xml format). If classes.txt not found in source folder,
-        all classes will be annotated as '{self.DEFAULT_OBJ_NAME}'.
-            Params:
+        Initializes the converter with specific formats and directory paths.
 
+        Args:
+            source_format (str): The format of source files (e.g., '.txt').
+            dest_format (str): The format of output files (e.g., '.xml').
+            extensions (Tuple[str, ...]): Supported image extensions (e.g., '.jpg', '.png').
+            **kwargs: Additional parameters like 'img_path' or 'labels_path'.
         """
         super().__init__(source_format, dest_format, **kwargs)
         self.extensions: Tuple[str, ...] = extensions
@@ -37,6 +48,12 @@ class YoloVocConverter(BaseConverter):
 
     @classmethod
     def _init_worker(cls, image_dict: Dict[str, str]):
+        """
+        Prepares a worker process by storing a shared image map in the class memory.
+
+        Args:
+            image_dict (Dict[str, str]): A dictionary mapping image names to their paths.
+        """
         cls._worker_image_map = image_dict
 
     @staticmethod
@@ -49,23 +66,21 @@ class YoloVocConverter(BaseConverter):
             suffix: str
     ) -> bool:
         """
-        pipline for parsing annotations, recalculating annotated objects data to YOLO format and savin it in
-            destination path
+        The main logic for converting one YOLO file to one VOC XML file.
 
-        :param file_path: path to annotation file
-        :type file_path: Path
-        :param destination_path: path to output annotation file
-        :type destination_path: Path
-        :param reader: reader object for parsing annotations
-        :type reader: BaseReader
-        :param writer: writer object for writing converted annotation files
-        :type writer: BaseWriter
-        :param class_mapping: mapping from class name to class id
-        :type class_mapping: Dict[str, int]
-        :param suffix: suffix to add to filename
-        :type suffix: str
-        :return: True if a file was successfully converted, else returns False
+        It reads the YOLO data, finds the matching image to get its dimensions,
+        recalculates coordinates into pixel values, and saves the final XML.
 
+        Args:
+            file_path (Path): Path to the source YOLO annotation file.
+            destination_path (Path): Directory where the .xml file will be saved.
+            reader (BaseReader): Tool to read the source file data.
+            writer (BaseWriter): Tool to write the resulting XML data.
+            class_mapping (Dict[str, str]): Mapping of class IDs to string names.
+            suffix (str): Extension for the output file.
+
+        Returns:
+            bool: True if the conversion was successful, False otherwise.
         """
 
         yolo_annotations = reader.read(file_path).keys()
@@ -142,6 +157,17 @@ class YoloVocConverter(BaseConverter):
         return True
 
     def convert(self, file_paths: Tuple[Path], target_path: Path, n_jobs: int = 1) -> None:
+        """
+        Batch converts multiple YOLO files into VOC format using parallel processing.
+
+        This method prepares the class names, builds a fast image lookup table,
+        and manages the process pool for the conversion task.
+
+        Args:
+            file_paths (Tuple[Path]): List of paths to the annotation files.
+            target_path (Path): Directory where converted files will be stored.
+            n_jobs (int): Number of parallel workers to use. Defaults to 1.
+        """
         target_path.mkdir(exist_ok=True, parents=True)
         classes_file = next((path for path in file_paths if path.name == self.CLASSES_FILE), None)
         if classes_file is None:
@@ -179,10 +205,21 @@ class YoloVocConverter(BaseConverter):
 
     @property
     def img_path(self) -> Path:
+        """Path: Returns the directory path where images are stored."""
         return self._img_path
 
     @img_path.setter
     def img_path(self, img_path: Union[Path, str, None]) -> None:
+        """
+        Sets the directory for images and validates the input.
+
+        Args:
+        img_path (Union[Path, str, None]): Path to annotated images folder.
+            If None, it uses YOLO annotations same path .
+
+        Raises:
+        TypeError: If the provided path is not a string or Path object.
+        """
         if isinstance(img_path, Path):
             self._img_path = img_path
         elif isinstance(img_path, str):
@@ -197,10 +234,20 @@ class YoloVocConverter(BaseConverter):
 
     @property
     def extensions(self) -> Tuple[str, ...]:
+        """Tuple[str, ...]: Returns the supported image file extensions."""
         return self._extensions
 
     @extensions.setter
     def extensions(self, value: Tuple[str, ...]) -> None:
+        """
+        Sets the valid image extensions for the converter.
+
+        Args:
+            value (Tuple[str, ...]): A tuple of extension strings (e.g., ('.jpg',)).
+
+        Raises:
+            TypeError: If the input cannot be converted into a tuple.
+        """
         if isinstance(value, tuple):
             self._extensions = value
         else:
