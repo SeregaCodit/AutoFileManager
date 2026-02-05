@@ -34,10 +34,10 @@ class YoloVocConverter(BaseConverter):
         Initializes the converter with specific formats and directory paths.
 
         Args:
-            source_format (str): The format of source files (e.g., '.txt').
-            dest_format (str): The format of output files (e.g., '.xml').
+            source_format (str): The format of source annotation (e.g., 'yolo').
+            dest_format (str): The format of output annotations (e.g., 'voc').
             extensions (Tuple[str, ...]): Supported image extensions (e.g., '.jpg', '.png').
-            **kwargs: Additional parameters like 'img_path' or 'labels_path'.
+            **kwargs (dict): Additional parameters like 'img_path' or 'labels_path'.
         """
         super().__init__(source_format, dest_format, **kwargs)
         self.extensions: Tuple[str, ...] = extensions
