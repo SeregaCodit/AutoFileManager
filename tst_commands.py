@@ -49,8 +49,9 @@ MAPPING = {
         "convert-annotations",
         "./media/annotated/",
         "--dst", "./media/yolo_anns/",
-        "-p", ".xml",
-        "--destination-type", "yolo"
+        "-p", "yolo",
+        "--img_path", "./media/annotated/", # only for converting from yolo format
+        "--destination-type", "voc"
     ]
 }
 
