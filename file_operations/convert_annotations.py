@@ -15,12 +15,15 @@ from tools.annotation_converter.converter.yolo_voc_converter import YoloVocConve
 
 class ConvertAnnotationsOperation(FileOperation):
     def __init__(self, settings: AppSettings, **kwargs):
-        """
-        Converts annotation formats from pattern to destination. You Can use only one value of pattern at the time
-        Params:
-            pattern: in this command pattern - must be a format ttype (e.g. yolo, voc)
-            destination_type: format type convert to
-            n_jobs: how many workers to run, max workers can be your CPU count minus 1 for system stability
+        """Sets up the tool to change annotation formats.
+
+        Args:
+            settings (AppSettings): The default settings for the app.
+            **kwargs (dict): Extra options for the task. It includes:
+                pattern: The starting format (like 'voc' or 'yolo').
+                destination_type: The new format you want.
+                img_path: Where the images are located.
+                n_jobs: How many tasks to run at the same time.
         """
         super().__init__(settings, **kwargs)
         self.destination_type = kwargs.get('destination_type')
@@ -44,6 +47,12 @@ class ConvertAnnotationsOperation(FileOperation):
 
     @staticmethod
     def add_arguments(settings: AppSettings, parser: argparse.ArgumentParser) -> None:
+        """Adds the necessary options to the command line tool.
+
+        Args:
+            settings (AppSettings): The main settings for the app.
+            parser (argparse.ArgumentParser): The tool that reads command line options.
+        """
         parser.add_argument(
             Arguments.dst,
             default=None,
@@ -72,7 +81,5 @@ class ConvertAnnotationsOperation(FileOperation):
 
 
     def do_task(self):
+        """Starts the conversion of the annotation files"""
         self.converter.convert(self.files_for_task, self.target_directory, self.n_jobs)
-
-
-
