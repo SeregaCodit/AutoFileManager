@@ -26,7 +26,15 @@ class BaseConverter(ABC):
             log_path: Optional[Path] = None,
             **kwargs
     ):
+        """
+        Initialize the converter class.
 
+        Args:
+            source_format (str): The format of source annotation (e.g., 'yolo').
+            dest_format (str): The format of output annotations (e.g., 'voc').
+            log_level: (str): The lowest logging level print to (e.g., 'debug').
+            **kwargs (dict): Additional parameters like 'img_path' or 'labels_path'.
+        """
         self.reader_mapping = {
             ".xml": XMLReader,
             ".txt": TXTReader
@@ -56,20 +64,43 @@ class BaseConverter(ABC):
 
     @abstractmethod
     def convert(self, file_paths: Tuple[Path], target_path: Path, n_jobs: int = 1) -> None:
+        """
+        Abstract method to convert source annotation file to destination annotation file by running custom workers in
+            subclasses
+
+        Args:
+            file_paths (Tuple[Path]): List of paths to the annotation files.
+            target_path (Path): Directory where converted files will be stored.
+            n_jobs (int): Number of parallel workers to use. Defaults to 1.
+        """
         pass
     
     @property
     def reader(self) -> BaseReader:
+        """BaseReader: returns a reader for the annotation file."""
         return self._reader
     
     @reader.setter
     def reader(self, reader: BaseReader) -> None:
+        """
+        Sets a reader for the annotation filetype.
+
+        Args:
+            reader (BaseReader): Reader for the annotation filetype.
+        """
         self._reader = reader
 
     @property
     def writer(self) -> BaseWriter:
+        """BaseWriter: returns a writer for the annotation filetype."""
         return self._writer
 
     @writer.setter
     def writer(self, writer: BaseWriter) -> None:
+        """
+        Sets a writer for the annotation filetype.
+
+        Args:
+            writer (BaseWriter): Writer for the annotation filetype.
+        """
         self._writer = writer

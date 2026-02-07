@@ -29,14 +29,25 @@ nav:
       - clean-annotations: operations/clean_annotations.md
       - convert-annotations: operations/convert_annotations.md
   - API Reference:
+      - Main: api/data_forge.md
       - Image Comparer: api/img_comparer.md
       - Hasher:
           - Base Hasher: api/base_hasher.md
           - DHash: api/dhash.md
       - Annotation Converter:
-          - Base Converter: api/converter.md
+          - Base Converter: api/base_converter.md
           - VOC to YOLO converter: api/voc_yolo_converter.md
           - YOLO to VOC converter: api/yolo_voc_converter.md
+      - Reader:
+          - Base reader: api/base_reader.md
+          - XML reader: api/xml_reader.md
+          - TXT reader: api/txt_reader.md
+      - Writer:
+          - Base writer: api/base_writer.md
+          - XML writer: api/xml_writer.md
+          - TXT writer: api/yolo_writer.md
+      - Mixins:
+          - FileRemoverMixin: api/file_remover.md
   - CLI:
       - CLI launching: cli/data_forge.md
       - Default Settings: cli/default_values.md
