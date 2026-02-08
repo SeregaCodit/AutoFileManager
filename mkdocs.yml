@@ -31,6 +31,7 @@ nav:
   - API Reference:
       - Main: api/data_forge.md
       - Image Comparer: api/img_comparer.md
+      - Video slicer: api/video_slicer.md
       - Hasher:
           - Base Hasher: api/base_hasher.md
           - DHash: api/dhash.md
@@ -48,6 +49,7 @@ nav:
           - TXT writer: api/yolo_writer.md
       - Mixins:
           - FileRemoverMixin: api/file_remover.md
+      - CacheIO: api/cache_io.md
   - CLI:
       - CLI launching: cli/data_forge.md
       - Default Settings: cli/default_values.md
