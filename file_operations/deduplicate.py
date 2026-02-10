@@ -112,6 +112,6 @@ class DedupOperation(FileOperation, FileRemoverMixin):
             bool: True if deletion is confirmed, False otherwise.
         """
         if not self.remove:
-            user_choice = input("for deleting founded duplicate files type 'delete': ")
+            user_choice = input("for deleting founded duplicate files type 'yes': ")
             return user_choice.lower() in self.settings.confirm_choice
         return True

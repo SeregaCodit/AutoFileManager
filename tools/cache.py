@@ -1,6 +1,6 @@
 import hashlib
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Any
 import numpy as np
 import pandas as pd
 
@@ -109,7 +109,7 @@ class CacheIO:
 
 
     @classmethod
-    def generate_cache_filename(cls, source_path: Path, cache_name: Optional[Union[str, Path]], **kwargs) -> str:
+    def generate_cache_filename(cls, source_path: Path, cache_name: Optional[Union[str, Path]], **kwargs: Any) -> str:
         """
         Generates a unique, versioned filename for the cache.
 
