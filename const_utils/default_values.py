@@ -40,7 +40,7 @@ class AppSettings(BaseSettings):
         cache_name (Optional[Path]): Custom name for the cache file.
         a_suffix (Tuple[str, ...]): File patterns specific to annotations.
         a_source (Optional[Path]): Directory where annotation files are located.
-        destination_type (Optional[str]): Target format for annotation conversion.
+        destination_type (Optional[str]): Target format for annotations.
         extensions (Tuple[str, ...]): Supported image file extensions.
     """
     max_percentage: int = 100
@@ -61,7 +61,7 @@ class AppSettings(BaseSettings):
     filetype: str = Field(default=Constants.image)
     method: str = Field(default=Constants.dhash)
     hash_threshold: int = Field(default=10, ge=0, le=100)
-    confirm_choice: tuple = Field(default=("delete",))
+    confirm_choice: tuple = Field(default=("yes",))
     core_size: int = Field(default=8, ge=8)
     n_jobs: int = Field(default=2, ge=1, le=multiprocessing.cpu_count())
     cache_file_path: Path = Field(default=Path("./cache"))
