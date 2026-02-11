@@ -33,3 +33,4 @@ class Arguments:
     destination_type: str = "--destination-type"
     img_path: str = "--img_path"
     extensions: str = "--ext"
+    margin: str = "--margin"

@@ -52,9 +52,10 @@ nav:
       - Mixins:
           - FileRemoverMixin: api/file_remover.md
       - Stats:
-            - Base Stats: api/base_stats.md
-            - Yolo Stats: api/yolo_stats.md
-            - VOC Stats: api/voc_stats.md
+          - Feature extractor: api/feature_extractor.md
+          - Base Stats: api/base_stats.md
+          - Yolo Stats: api/yolo_stats.md
+          - VOC Stats: api/voc_stats.md
   - CLI:
       - CLI launching: cli/data_forge.md
       - Default Settings: cli/default_values.md

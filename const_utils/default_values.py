@@ -70,6 +70,7 @@ class AppSettings(BaseSettings):
     a_source: Optional[Path] = Field(default=None)
     destination_type: Optional[str] = Field(default=None)
     extensions: Tuple[str, ...] = Field(default=(".jpg", ".jpeg,", ".png"))
+    margin_threshold: int = Field(default=5, ge=0, le=100)
 
 
     @field_validator('core_size')

@@ -129,7 +129,7 @@ class CacheIO:
             abs_path = str(source_path.resolve())
             path_hash = hashlib.md5(abs_path.encode('utf-8')).hexdigest()
             folder_name = str(source_path.name.replace(' ', '_').strip("."))[:30]
-            return f"cache_{path_hash}_d{folder_name}{full_suffix}"
+            return f"cache_{path_hash}_{folder_name}{full_suffix}"
         else:
             cache_name = str(cache_name).replace(" ", "_").strip(".")
             if cache_name.endswith(cls.SUFFIX):

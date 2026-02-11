@@ -37,3 +37,5 @@ class HelpStrings:
     img_path: str = "Path to dataset images directory"
     extensions: str = ("A tuple of file extensions that will be used as pattern for building file whitelists for "
                        "converting from yolo to other formats")
+    margin: str = ("A threshold value of margin from any image border. If any side of object bbox cloaser that this"
+                   "value to image boarder - object will be defined as truncated")

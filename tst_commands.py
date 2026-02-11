@@ -52,6 +52,13 @@ MAPPING = {
         "-p", "yolo",
         "--img_path", "./media/annotated/", # only for converting from yolo format
         "--destination-type", "voc"
+    ],
+    Commands.stats: [
+        "data_forge.py",
+        "stats",
+        "./media/annotated/",
+        "-p", ".xml",
+        "--destination-type", "voc",
     ]
 }
 
@@ -60,6 +67,6 @@ if __name__ == "__main__":
     MAPPING[Commands.dedup].append("16")
 
 
-    sys.argv = MAPPING[Commands.dedup]
+    sys.argv = MAPPING[Commands.stats]
     app = DataForge()
     app.execute()
