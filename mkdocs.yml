@@ -53,6 +53,7 @@ nav:
           - FileRemoverMixin: api/file_remover.md
       - Stats:
           - Feature extractor: api/feature_extractor.md
+          - Image Analyzer: api/image_analyzer.md
           - Base Stats: api/base_stats.md
           - Yolo Stats: api/yolo_stats.md
           - VOC Stats: api/voc_stats.md

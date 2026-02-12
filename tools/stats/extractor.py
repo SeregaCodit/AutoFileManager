@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import List, Dict, Any, Union
 
+from const_utils.stats_constansts import ImageStatsKeys
+from const_utils.xml_names import XMLNames
+
 
 class FeatureExtractor:
     """
@@ -28,15 +31,15 @@ class FeatureExtractor:
             filepath = str(filepath)
 
         has_neighbors = 1
-        image_data = data.get("size", {})
+        image_data = data.get(XMLNames.size, {})
 
-        im_width = int(image_data.get("width", 0))
-        im_height = int(image_data.get("height", 0))
-        im_depth = int(image_data.get("depth", 0))
+        im_width = int(image_data.get(XMLNames.width, 0))
+        im_height = int(image_data.get(XMLNames.height, 0))
+        im_depth = int(image_data.get(XMLNames.depth, 0))
         im_area = im_width * im_height
         img_center_x = im_width / 2
         img_center_y = im_height / 2
-        annotated_objects = data.get("object", [])
+        annotated_objects = data.get(XMLNames.object, [])
 
         if isinstance(annotated_objects, dict):
             annotated_objects = [annotated_objects]
@@ -46,12 +49,12 @@ class FeatureExtractor:
         objects_count = len(annotated_objects)
 
         for obj in annotated_objects:
-            bbox = obj.get("bndbox")
+            bbox = obj.get(XMLNames.bndbox)
 
-            xmax = int(bbox.get("xmax", 0))
-            ymax = int(bbox.get("ymax", 0))
-            xmin = int(bbox.get("xmin", 0))
-            ymin = int(bbox.get("ymin", 0))
+            xmax = int(bbox.get(XMLNames.xmax, 0))
+            ymax = int(bbox.get(XMLNames.ymax, 0))
+            xmin = int(bbox.get(XMLNames.xmin, 0))
+            ymin = int(bbox.get(XMLNames.ymin, 0))
 
             width = xmax - xmin
             height = ymax - ymin
@@ -116,32 +119,33 @@ class FeatureExtractor:
                 truncated_top,
                 truncated_bottom]) else 0
 
-            object_data = dict(
-                path=filepath,
-                class_name=obj.get("name", "unfilled"),
-                objects_count=objects_count,
-                im_width=im_width,
-                im_height=im_height,
-                im_depth=im_depth,
-                has_neighbors=has_neighbors,
-                object_width=width,
-                object_height=height,
-                object_area=area,
-                object_relative_area=relative_area,
-                object_in_center=in_center,
-                object_in_right_side=in_right_side,
-                object_in_left_side=in_left_side,
-                object_in_top_side=in_top_side,
-                object_in_bottom_side=in_bottom_side,
-                object_in_left_top=in_left_top,
-                object_in_right_top=in_right_top,
-                object_in_left_bottom=in_left_bottom,
-                object_in_right_bottom=in_right_bottom,
-                full_size=full_size,
-                truncated_left=truncated_left,
-                truncated_right=truncated_right,
-                truncated_top=truncated_top,
-                truncated_bottom=truncated_bottom,
-            )
+            object_data = {
+                ImageStatsKeys.path: filepath,
+                ImageStatsKeys.class_name: obj.get(XMLNames.name, "unfilled"),
+                ImageStatsKeys.objects_count: objects_count,
+                ImageStatsKeys.im_width: im_width,
+                ImageStatsKeys.im_height: im_height,
+                ImageStatsKeys.im_depth: im_depth,
+                ImageStatsKeys.has_neighbors: has_neighbors,
+                ImageStatsKeys.object_width: width,
+                ImageStatsKeys.object_height: height,
+                ImageStatsKeys.object_area: area,
+                ImageStatsKeys.object_relative_area: relative_area,
+                ImageStatsKeys.object_in_center: in_center,
+                ImageStatsKeys.object_in_right_side: in_right_side,
+                ImageStatsKeys.object_in_left_side: in_left_side,
+                ImageStatsKeys.object_in_top_side: in_top_side,
+                ImageStatsKeys.object_in_bottom_side: in_bottom_side,
+                ImageStatsKeys.object_in_left_top: in_left_top,
+                ImageStatsKeys.object_in_right_top: in_right_top,
+                ImageStatsKeys.object_in_left_bottom: in_left_bottom,
+                ImageStatsKeys.object_in_right_bottom: in_right_bottom,
+                ImageStatsKeys.full_size: full_size,
+                ImageStatsKeys.truncated_left: truncated_left,
+                ImageStatsKeys.truncated_right: truncated_right,
+                ImageStatsKeys.truncated_top: truncated_top,
+                ImageStatsKeys.truncated_bottom: truncated_bottom
+            }
+
             result.append(object_data)
         return result

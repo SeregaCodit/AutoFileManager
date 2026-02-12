@@ -4,6 +4,7 @@ from typing import Optional, Dict, List
 from tools.annotation_converter.reader.base import BaseReader
 from tools.stats.base_stats import BaseStats
 from tools.stats.extractor import FeatureExtractor
+from tools.stats.image_analyzer import ImageContentAnalyzer
 
 
 class VOCStats(BaseStats):
@@ -43,6 +44,11 @@ class VOCStats(BaseStats):
                 return []
 
             stat_data = FeatureExtractor.extract_features(file_path, annotation_data, margin_threshold)
+            pixel_data = ImageContentAnalyzer.analyze_metrics(file_path)
+
+            for obj in stat_data:
+                obj.update(pixel_data)
+
             return stat_data
         except Exception as e:
             return []
