@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional, Dict, List
 
 from const_utils.stats_constansts import ImageStatsKeys
+from const_utils.xml_names import XMLNames
 from tools.annotation_converter.reader.base import BaseReader
 from tools.stats.base_stats import BaseStats
 from tools.stats.extractor import FeatureExtractor
@@ -61,6 +62,7 @@ class VOCStats(BaseStats):
 
             for obj in stat_data:
                 obj.update(pixel_data)
+                obj.update({ImageStatsKeys.im_path: correspond_img_str})
 
             return stat_data
         except Exception as e:

@@ -31,7 +31,6 @@ class BaseStats(ABC):
             log_path: Optional[Path] = None,
             settings: Optional[AppSettings] = None,
             cache_io: Optional[CacheIO] = None,
-            reporter: Optional[ImageDatasetReporter] = None,
             img_path: Optional[Union[Path, str]] = None,
             extensions: Optional[Tuple[str, ...]] = None,
     ):
@@ -62,7 +61,6 @@ class BaseStats(ABC):
         self.source_suffix = self.suffix_mapping.get(source_format)
         self.reader = self.reader_mapping[self.source_suffix]()
         self.cache_io = cache_io or CacheIO(self.settings)
-        self.reporter = reporter or ImageDatasetReporter(settings=self.settings)
         self.n_jobs = self.settings.n_jobs
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
@@ -129,6 +127,7 @@ class BaseStats(ABC):
             self.logger.info(f"Incremental update: processing {len(files_for_task)} files with {self.n_jobs} workers")
             images = {img.stem: str(img.resolve()) for img in self.img_path.iterdir() if
                       img.suffix.lower() in self.extensions}
+
             worker_func = partial(
                 self._analyze_worker,
                 reader=self.reader,
@@ -154,4 +153,3 @@ class BaseStats(ABC):
                 self.cache_io.save(df_final, cache_file)
 
         return df_final
-

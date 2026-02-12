@@ -40,7 +40,7 @@ MAPPING = {
         # "/mnt/qnap/Staff/Naumenko/NotTheSkynet/img_dataset/",
         # "/home/pivden/PycharmProjects/yoloTrainer/saved_imgs/",
         "-p", ".jpg", ".png",
-        "--filetype", "image",
+        "--datatype", "image",
         "--threshold", "10",
         "--cache_name", "test1"
     ],

@@ -31,7 +31,7 @@ class AppSettings(BaseSettings):
         step_sec (float): Time interval in seconds for video slicing.
         log_path (Path): Directory where log files are stored.
         log_level (str): Verbosity level of the logger (e.g., INFO, DEBUG).
-        filetype (str): The category of files being processed (e.g., image).
+        datatype (str): The category of files being processed (e.g., image).
         method (str): The algorithm name for hashing or comparison.
         hash_threshold (int): Distance threshold for identifying duplicates (0-100).
         confirm_choice (tuple): Keywords used to confirm interactive deletion.
@@ -59,7 +59,7 @@ class AppSettings(BaseSettings):
     step_sec: float = Field(default=1.0, ge=0.1)
     log_path: Path = Field(default=Path("./log"))
     log_level: str = Field(default=LevelMapping.info)
-    filetype: str = Field(default=Constants.image)
+    datatype: str = Field(default=Constants.image)
     method: str = Field(default=Constants.dhash)
     hash_threshold: int = Field(default=10, ge=0, le=100)
     confirm_choice: tuple = Field(default=("yes",))

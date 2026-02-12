@@ -19,7 +19,7 @@ class Arguments:
     rm: str = "-rm"
     log_level: str = "--log_level"
     log_path: str = "--log_path"
-    filetype: str = "--filetype"
+    datatype: str = "--datatype"
     method: str = "--method"
     m: str = "-m"
     action: str = "--action"

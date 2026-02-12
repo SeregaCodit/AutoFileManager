@@ -1,30 +1,64 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Union, List
 
 import pandas as pd
-from jinja2.nodes import List
 
 from const_utils.default_values import AppSettings
 from logger.logger import LoggerConfigurator
 
 
 class BaseDatasetReporter(ABC):
-    def __init__(self, settings: AppSettings, **kwargs):
+
+    line: str = "=" * 75
+
+    def __init__(self, settings: AppSettings):
         self.settings: AppSettings = settings
-        self.log_path: Path = kwargs.get("log_path", settings.log_path)
-        log_file = kwargs.get("log_file", self.__class__.__name__)
-        log_level = kwargs.get("log_level", settings.log_level)
+        self.log_path: Path = settings.log_path
+        log_level = settings.log_level
         self.schema = self.settings.img_dataset_report_schema
         self.report_path = self.settings.report_path
+
         self.logger = LoggerConfigurator.setup(
             name=self.__class__.__name__,
             log_level=log_level,
-            log_path=Path(self.log_path) / f"{log_file}.log" if self.log_path else None
+            log_path=Path(self.log_path) / f"{self.__class__.__name__}.log" if self.log_path else None
         )
 
-    def render_section(self, df: pd.DataFrame, section_name: str):
+    @abstractmethod
+    def show_console_report(self, df: pd.DataFrame, target_format: str) -> None:
         pass
+
+    def _render_section(self, df: Union[pd.DataFrame, pd.Series], section: dict, total_objects: int) -> List[str]:
+        title = section["title"]
+        cols = [col for col in section["columns"] if col in df.columns]
+
+        if not cols:
+            self.logger.warning(f"No valid columns found for section '{title}' in the DataFrame.")
+            return []
+
+        lines = [f"\n [{title}]"]
+
+        if section["type"] == "numeric":
+            stats = df[cols].describe().T
+            for col in cols:
+                row = stats.loc[col]
+                lines.append(
+                    f"  - {col:<25}:"
+                    f" med {row['50%']:>10.2f} |"
+                    f" avg {row['mean']:>10.2f}, std {row['std']:<10.2f} |"
+                    f" min {row['min']:>10.2f}, max {row['max']:>10.2f}"
+                )
+        elif section["type"] == "binary":
+            sums = df[cols].sum()
+            for col in cols:
+                count = int(sums[col])
+                share = (count / total_objects) * 100
+                lines.append(f"  - {col:<25}: {count:>10} ({share:>6.1f}%)")
+        else:
+            self.logger.warning(f"Unknown section type '{section['type']}' for section '{title}'. Skipping.")
+
+        return lines
 
     @property
     def report_path(self) -> Path:

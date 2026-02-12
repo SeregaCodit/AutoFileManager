@@ -8,7 +8,7 @@
   "log_path": "./log",
   "log_level": "INFO",
   "report_path": "./reports",
-  "filetype": "image",
+  "datatype": "image",
   "method": "dhash",
   "hash_threshold": 10,
   "confirm_choice": [
@@ -35,6 +35,15 @@
       ]
     },
     {
+      "title": "IMAGE QUALITY",
+      "type": "numeric",
+      "columns": [
+        "im_brightness",
+        "im_contrast",
+        "im_blur_score"
+      ]
+    },
+    {
       "title": "SPATIAL BIAS",
       "type": "binary",
       "columns": [
@@ -58,15 +67,7 @@
         "truncated_left",
         "truncated_right"
       ]
-    },
-    {
-      "title": "IMAGE QUALITY",
-      "type": "numeric",
-      "columns": [
-        "im_brightness",
-        "im_contrast",
-        "im_blur_score"
-      ]
     }
+
   ]
 }
