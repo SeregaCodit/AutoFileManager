@@ -19,7 +19,6 @@ class ImageDatasetReporter(BaseDatasetReporter):
             self.line,
             f"Total images             :  {total_annotations}",
             f"Total annotated objects  :  {total_objects}",
-            f"Total annotated objects  :  {total_objects}",
             f"Objects per image (avg)  :  {average_density:.2f}",
             f"Density deviation (std)  :  {std_density:.2f}"
         ]

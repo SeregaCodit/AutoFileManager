@@ -15,6 +15,7 @@ from tools.annotation_converter.reader.voc import XMLReader
 from tools.annotation_converter.reader.yolo import TXTReader
 from tools.cache import CacheIO
 from tools.stats.dataset_reporter.image_reporter import ImageDatasetReporter
+from tools.stats.outlier_detector import OutlierDetector
 
 
 class BaseStats(ABC):
@@ -148,6 +149,15 @@ class BaseStats(ABC):
                 mtime_map = {str(path): path.stat().st_mtime for path in files_for_task}
                 df_new[ImageStatsKeys.mtime] = df_new[ImageStatsKeys.path].map(mtime_map)
                 df_final = pd.concat([df_final, df_new], ignore_index=True)
+                df_final.reset_index(drop=True, inplace=True)
+
+                numeric_cols = []
+                for section in self.settings.img_dataset_report_schema:
+                    if section["type"] == "numeric":
+                        numeric_cols.extend(section["columns"])
+
+
+                df_final = OutlierDetector.mark_outliers(df_final, numeric_cols)
 
             if files_for_task or (len(df_cached) != len(df_final)):
                 self.cache_io.save(df_final, cache_file)

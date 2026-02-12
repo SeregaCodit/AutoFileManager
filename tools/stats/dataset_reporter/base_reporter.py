@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Union, List
 
+import numpy as np
 import pandas as pd
 
 from const_utils.default_values import AppSettings
@@ -43,11 +44,18 @@ class BaseDatasetReporter(ABC):
             stats = df[cols].describe().T
             for col in cols:
                 row = stats.loc[col]
+                outlier_col = f"outlier_{col}"
+                outliers_count = df[outlier_col].sum()
+                min_limit = np.clip(row["mean"] - 3 * row["std"], a_min=0, a_max=None)
+                max_limit = row["mean"] + 3 * row["std"]
+
                 lines.append(
                     f"  - {col:<25}:"
                     f" med {row['50%']:>10.2f} |"
                     f" avg {row['mean']:>10.2f}, std {row['std']:<10.2f} |"
-                    f" min {row['min']:>10.2f}, max {row['max']:>10.2f}"
+                    f" min {row['min']:>10.2f}, max {row['max']:>10.2f}  |"
+                    f" outliers: {int(outliers_count):<4} |"
+                    f"{min_limit:10.2f} < sweet spot < {max_limit:10.2f} "
                 )
         elif section["type"] == "binary":
             sums = df[cols].sum()
