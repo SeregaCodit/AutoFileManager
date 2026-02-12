@@ -29,124 +29,130 @@ class FeatureExtractor:
         """
         if not isinstance(filepath, str):
             filepath = str(filepath)
+        try:
+            has_neighbors = 1
+            image_data = data.get(XMLNames.size, {})
 
-        has_neighbors = 1
-        image_data = data.get(XMLNames.size, {})
+            im_width = int(image_data.get(XMLNames.width, 0))
+            im_height = int(image_data.get(XMLNames.height, 0))
 
-        im_width = int(image_data.get(XMLNames.width, 0))
-        im_height = int(image_data.get(XMLNames.height, 0))
-        im_depth = int(image_data.get(XMLNames.depth, 0))
-        im_area = im_width * im_height
-        img_center_x = im_width / 2
-        img_center_y = im_height / 2
-        annotated_objects = data.get(XMLNames.object, [])
+            if any([im_width <= 0, im_height <= 0]):
+                return []
 
-        if isinstance(annotated_objects, dict):
-            annotated_objects = [annotated_objects]
-            has_neighbors = 0
+            im_depth = int(image_data.get(XMLNames.depth, 0))
+            im_area = im_width * im_height
+            img_center_x = im_width / 2
+            img_center_y = im_height / 2
+            annotated_objects = data.get(XMLNames.object, [])
 
-        result = []
-        objects_count = len(annotated_objects)
+            if isinstance(annotated_objects, dict):
+                annotated_objects = [annotated_objects]
+                has_neighbors = 0
 
-        for obj in annotated_objects:
-            bbox = obj.get(XMLNames.bndbox)
+            result = []
+            objects_count = len(annotated_objects)
 
-            xmax = int(bbox.get(XMLNames.xmax, 0))
-            ymax = int(bbox.get(XMLNames.ymax, 0))
-            xmin = int(bbox.get(XMLNames.xmin, 0))
-            ymin = int(bbox.get(XMLNames.ymin, 0))
+            for obj in annotated_objects:
+                bbox = obj.get(XMLNames.bndbox)
 
-            width = xmax - xmin
-            height = ymax - ymin
-            area = width * height
-            relative_area = area / im_area
+                xmax = int(bbox.get(XMLNames.xmax, 0))
+                ymax = int(bbox.get(XMLNames.ymax, 0))
+                xmin = int(bbox.get(XMLNames.xmin, 0))
+                ymin = int(bbox.get(XMLNames.ymin, 0))
 
-            # if bbox corners in all four image quarters
-            in_center = 1 if all([
-                xmin <= img_center_x <= xmax,
-                ymin <= img_center_y <= ymax
-            ]) else 0
-            # if object on im_center_y coord but has right offset
-            in_right_side = 1 if all([
-                ymin < img_center_y < ymax,
-                xmin > img_center_x
-            ]) else 0
-            # if object on im_center_y coord but has left offset
-            in_left_side = 1 if all([
-                ymin < img_center_y < ymax,
-                xmax < img_center_x
-            ]) else 0
-            # if object on im_center_x coord but has top offset
-            in_top_side = 1 if all([
-                xmin < img_center_x < xmax,
-                ymax < img_center_y
-            ]) else 0
-            # if object on im_center_x coord but has bottom offset
-            in_bottom_side = 1 if all([
-                xmin < img_center_x < xmax,
-                ymin > img_center_y
-            ]) else 0
-            # object absolutely in top left quarter
-            in_left_top = 1 if all([
-                xmax < img_center_x,
-                ymax < img_center_y
-            ]) else 0
-            # object absolutely in top right quarter
-            in_right_top = 1 if all([
-                xmin > img_center_x,
-                ymax > img_center_y
-            ]) else 0
-            # object absolutely in left bottom quarter
-            in_left_bottom = 1 if all([
-                xmax < img_center_x,
-                ymin > img_center_y
-            ]) else 0
-            # object absolutely in right bottom quarter
-            in_right_bottom = 1 if all([
-                xmin > img_center_x,
-                ymin > img_center_y
-            ]) else 0
+                width = xmax - xmin
+                height = ymax - ymin
+                area = width * height
+                relative_area = area / im_area
 
-            truncated_left = 1 if xmin < margin_threshold else 0
-            truncated_right = 1 if xmax > (im_width - margin_threshold) else 0
-            truncated_top = 1 if ymin < margin_threshold else 0
-            truncated_bottom = 1 if ymax > (im_height - margin_threshold) else 0
+                # if bbox corners in all four image quarters
+                in_center = 1 if all([
+                    xmin <= img_center_x <= xmax,
+                    ymin <= img_center_y <= ymax
+                ]) else 0
+                # if object on im_center_y coord but has right offset
+                in_right_side = 1 if all([
+                    ymin < img_center_y < ymax,
+                    xmin > img_center_x
+                ]) else 0
+                # if object on im_center_y coord but has left offset
+                in_left_side = 1 if all([
+                    ymin < img_center_y < ymax,
+                    xmax < img_center_x
+                ]) else 0
+                # if object on im_center_x coord but has top offset
+                in_top_side = 1 if all([
+                    xmin < img_center_x < xmax,
+                    ymax < img_center_y
+                ]) else 0
+                # if object on im_center_x coord but has bottom offset
+                in_bottom_side = 1 if all([
+                    xmin < img_center_x < xmax,
+                    ymin > img_center_y
+                ]) else 0
+                # object absolutely in top left quarter
+                in_left_top = 1 if all([
+                    xmax < img_center_x,
+                    ymax < img_center_y
+                ]) else 0
+                # object absolutely in top right quarter
+                in_right_top = 1 if all([
+                    xmin > img_center_x,
+                    ymax > img_center_y
+                ]) else 0
+                # object absolutely in left bottom quarter
+                in_left_bottom = 1 if all([
+                    xmax < img_center_x,
+                    ymin > img_center_y
+                ]) else 0
+                # object absolutely in right bottom quarter
+                in_right_bottom = 1 if all([
+                    xmin > img_center_x,
+                    ymin > img_center_y
+                ]) else 0
 
-            full_size = 1 if all([
-                truncated_bottom,
-                truncated_left,
-                truncated_right,
-                truncated_top,
-                truncated_bottom]) else 0
+                truncated_left = 1 if xmin < margin_threshold else 0
+                truncated_right = 1 if xmax > (im_width - margin_threshold) else 0
+                truncated_top = 1 if ymin < margin_threshold else 0
+                truncated_bottom = 1 if ymax > (im_height - margin_threshold) else 0
 
-            object_data = {
-                ImageStatsKeys.path: filepath,
-                ImageStatsKeys.class_name: obj.get(XMLNames.name, "unfilled"),
-                ImageStatsKeys.objects_count: objects_count,
-                ImageStatsKeys.im_width: im_width,
-                ImageStatsKeys.im_height: im_height,
-                ImageStatsKeys.im_depth: im_depth,
-                ImageStatsKeys.has_neighbors: has_neighbors,
-                ImageStatsKeys.object_width: width,
-                ImageStatsKeys.object_height: height,
-                ImageStatsKeys.object_aspect_ratio: width / height if height > 0 else 0,
-                ImageStatsKeys.object_area: area,
-                ImageStatsKeys.object_relative_area: relative_area,
-                ImageStatsKeys.object_in_center: in_center,
-                ImageStatsKeys.object_in_right_side: in_right_side,
-                ImageStatsKeys.object_in_left_side: in_left_side,
-                ImageStatsKeys.object_in_top_side: in_top_side,
-                ImageStatsKeys.object_in_bottom_side: in_bottom_side,
-                ImageStatsKeys.object_in_left_top: in_left_top,
-                ImageStatsKeys.object_in_right_top: in_right_top,
-                ImageStatsKeys.object_in_left_bottom: in_left_bottom,
-                ImageStatsKeys.object_in_right_bottom: in_right_bottom,
-                ImageStatsKeys.full_size: full_size,
-                ImageStatsKeys.truncated_left: truncated_left,
-                ImageStatsKeys.truncated_right: truncated_right,
-                ImageStatsKeys.truncated_top: truncated_top,
-                ImageStatsKeys.truncated_bottom: truncated_bottom
-            }
+                full_size = 1 if all([
+                    truncated_bottom,
+                    truncated_left,
+                    truncated_right,
+                    truncated_top,
+                    truncated_bottom]) else 0
 
-            result.append(object_data)
+                object_data = {
+                    ImageStatsKeys.path: filepath,
+                    ImageStatsKeys.class_name: obj.get(XMLNames.name, "unfilled"),
+                    ImageStatsKeys.objects_count: objects_count,
+                    ImageStatsKeys.im_width: im_width,
+                    ImageStatsKeys.im_height: im_height,
+                    ImageStatsKeys.im_depth: im_depth,
+                    ImageStatsKeys.has_neighbors: has_neighbors,
+                    ImageStatsKeys.object_width: width,
+                    ImageStatsKeys.object_height: height,
+                    ImageStatsKeys.object_aspect_ratio: width / height if height > 0 else 0,
+                    ImageStatsKeys.object_area: area,
+                    ImageStatsKeys.object_relative_area: relative_area,
+                    ImageStatsKeys.object_in_center: in_center,
+                    ImageStatsKeys.object_in_right_side: in_right_side,
+                    ImageStatsKeys.object_in_left_side: in_left_side,
+                    ImageStatsKeys.object_in_top_side: in_top_side,
+                    ImageStatsKeys.object_in_bottom_side: in_bottom_side,
+                    ImageStatsKeys.object_in_left_top: in_left_top,
+                    ImageStatsKeys.object_in_right_top: in_right_top,
+                    ImageStatsKeys.object_in_left_bottom: in_left_bottom,
+                    ImageStatsKeys.object_in_right_bottom: in_right_bottom,
+                    ImageStatsKeys.full_size: full_size,
+                    ImageStatsKeys.truncated_left: truncated_left,
+                    ImageStatsKeys.truncated_right: truncated_right,
+                    ImageStatsKeys.truncated_top: truncated_top,
+                    ImageStatsKeys.truncated_bottom: truncated_bottom
+                }
+
+                result.append(object_data)
+        except ZeroDivisionError:
+            return []
         return result

@@ -33,7 +33,7 @@ class BaseStats(ABC):
             cache_io: Optional[CacheIO] = None,
             reporter: Optional[ImageDatasetReporter] = None,
             img_path: Optional[Union[Path, str]] = None,
-            extentions: Optional[Tuple[str, ...]] = None,
+            extensions: Optional[Tuple[str, ...]] = None,
     ):
         """
         Initialize the stats class.
@@ -55,7 +55,7 @@ class BaseStats(ABC):
         }
 
         self.settings = settings
-        self.extensions = extentions
+        self.extensions = extensions
         self.img_path = img_path
         self.margin_threshold: int = self.settings.margin_threshold
         self.reader = self.reader_mapping.get(source_format, None)
@@ -84,7 +84,7 @@ class BaseStats(ABC):
             class_mapping: Optional[Dict[str, str]] = None
     ) -> List[Dict[str, str]]:
         pass
-    
+
     def get_features(
             self,
             file_paths: Tuple[Path, ...],
