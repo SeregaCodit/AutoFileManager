@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Dict, Union, List
 import pandas as pd
 
 from const_utils.default_values import AppSettings
+from const_utils.stats_constansts import ImageStatsKeys
 from logger.log_level_mapping import LevelMapping
 from logger.logger import LoggerConfigurator
 from tools.annotation_converter.reader.base import BaseReader
@@ -94,18 +95,23 @@ class BaseStats(ABC):
             df_final = pd.DataFrame()
             files_for_task = file_paths
         else:
-            current_files_state = [{"path": str(path.resolve()), "mtime": path.stat().st_mtime} for path in file_paths]
+            current_files_state = [
+                {ImageStatsKeys.path: str(path.resolve()), ImageStatsKeys.mtime: path.stat().st_mtime}
+                                   for path in file_paths
+            ]
             df_disk = pd.DataFrame(current_files_state)
             merged = df_disk.merge(
-                df_cached[["path", "mtime"]].drop_duplicates(),
+                df_cached[[ImageStatsKeys.path, ImageStatsKeys.mtime]].drop_duplicates(),
                 how="left",
-                on="path",
+                on=ImageStatsKeys.path,
                 suffixes=["", "_old"]
             )
 
-            to_update_mask = (merged['mtime_old'].isna()) | (merged['mtime'] != merged['mtime_old'])
-            files_for_task = [Path(p) for p in merged.loc[to_update_mask, 'path']]
-            df_final = df_cached[df_cached['path'].isin(df_disk[~to_update_mask]['path'])]
+            to_update_mask = (
+                    (merged[f"{ImageStatsKeys.mtime}_old"].isna()) |
+                    (merged[ImageStatsKeys.mtime] != merged[f"{ImageStatsKeys.mtime}_old"]))
+            files_for_task = [Path(p) for p in merged.loc[to_update_mask, ImageStatsKeys.path]]
+            df_final = df_cached[df_cached[ImageStatsKeys.path].isin(df_disk[~to_update_mask][ImageStatsKeys.path])]
 
         if files_for_task:
             self.logger.info(f"Incremental update: processing {len(files_for_task)} files with {self.n_jobs} workers")
@@ -124,7 +130,7 @@ class BaseStats(ABC):
             if new_data:
                 df_new = pd.DataFrame(new_data)
                 mtime_map = {str(path): path.stat().st_mtime for path in files_for_task}
-                df_new['mtime'] = df_new['path'].map(mtime_map)
+                df_new[ImageStatsKeys.path] = df_new[ImageStatsKeys.path].map(mtime_map)
                 df_final = pd.concat([df_final, df_new], ignore_index=True)
 
             if files_for_task or (len(df_cached) != len(df_final)):

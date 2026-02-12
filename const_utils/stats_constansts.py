@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class ImageStatsKeys:
     """Constants for stats dictionary keys and default values."""
     path: str = "path"
+    mtime: str = "mtime"
     class_name: str = "class_name"
     objects_count: str = "objects_count"
     im_width: str = "im_width"
