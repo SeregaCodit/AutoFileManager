@@ -73,7 +73,7 @@ class ImageDatasetReporter(BaseDatasetReporter):
                                                      f"corr_{name}.png")
 
         # --- ГРАФІК 5: t-SNE Manifold ---
-        StatsPlotter.plot_dataset_manifold(df, numeric_features, class_col, destination)
+        StatsPlotter.plot_dataset_manifold(df, numeric_features, class_col, destination, n_jobs=self.settings.n_jobs)
 
     def show_console_report(self, df: pd.DataFrame, target_format: str) -> None:
         total_objects = len(df)

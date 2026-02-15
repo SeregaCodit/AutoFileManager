@@ -7,12 +7,14 @@ import pandas as pd
 from pathlib import Path
 from typing import Union, Tuple, List, Optional
 from matplotlib.backends.backend_pdf import PdfPages
+from pandas.core.common import random_state
 from sklearn.preprocessing import StandardScaler
-from sklearn.manifold import TSNE
+from umap import UMAP
 
 from const_utils.stats_constansts import ImageStatsKeys
 
-matplotlib.set_loglevel("WARNING")
+
+# matplotlib.set_loglevel("WARNING")
 
 
 class StatsPlotter:
@@ -135,37 +137,65 @@ class StatsPlotter:
         StatsPlotter._save_and_close(fig, destination, filename)
 
 
+
     @staticmethod
-    def plot_dataset_manifold(df: pd.DataFrame, features: List[str], class_col: str,
-                              destination: Union[Path, str, PdfPages]) -> None:
-        # Balanced sampling
-        subset = df.sample(frac=1, random_state=42).groupby(class_col).head(1000)
-        if len(subset) < 10: return
+    def plot_dataset_manifold(
+            df: pd.DataFrame,
+            features: List[str],
+            class_col: str,
+            destination: Union[Path, str, PdfPages],
+            figsize: Tuple[int, int] = (14, 12),
+            n_jobs: int = 1,
+    ) -> None:
+        """
+        Generates a unified UMAP plot for the entire dataset.
+        Better than t-SNE for identifying gaps and clusters for balancing.
+        """
+
+        samples_per_class = 2000
+        subset = df.sample(frac=1, random_state=42).groupby(class_col).head(samples_per_class)
+
+        if len(subset) < 10:
+            return
 
         x_data = subset[features].fillna(0)
         x_data = x_data.loc[:, x_data.var() > 0]
-        if x_data.shape[1] < 2: return
+
+        if x_data.shape[1] < 2:
+            return
 
         x_scaled = StandardScaler().fit_transform(x_data)
-        tsne = TSNE(n_components=2, perplexity=min(30, len(subset) - 1), random_state=42, init='pca',
-                    learning_rate='auto')
-        x_2d = tsne.fit_transform(x_scaled)
 
-        fig, ax = plt.subplots(figsize=(12, 10))
-
-        num_colors = df[ImageStatsKeys.class_name].nunique()
-        sns.scatterplot(
-            x=x_2d[:, 0],
-            y=x_2d[:, 1],
-            hue=subset[class_col],
-            palette=sns.color_palette("husl", num_colors),
-            edgecolor='black',  # Тонка обводка
-            linewidth=0.5,  # Товщина обводки
-            s=60,
-            alpha=0.7,
-            ax=ax
+        n_neighbors = int(np.clip(len(x_data) * 0.1, a_min=15, a_max=50))
+        reducer = UMAP(
+            n_neighbors=n_neighbors,
+            min_dist=0.1,
+            n_components=2,
+            random_state=None,
+            n_jobs=n_jobs
         )
-        ax.set_title("Global Dataset Manifold (t-SNE)", fontsize=16)
+        embedding = reducer.fit_transform(x_scaled)
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        num_colors = len(subset[class_col].unique())
+
+        sns.scatterplot(
+            x=embedding[:, 0], y=embedding[:, 1],
+            hue=subset[class_col],
+            style=subset[class_col],
+            palette=sns.color_palette("husl", num_colors),
+            edgecolor='black',
+            linewidth=0.5,
+            s=60,
+            alpha=0.6,
+            ax=ax,
+            legend='full'
+        )
+
+        ax.set_title("DataForge: Global Dataset Manifold (UMAP Projection)", fontsize=16, pad=20)
+        ax.legend(title="Classes", bbox_to_anchor=(1.02, 1), loc='upper left')
         ax.grid(True, linestyle='--', alpha=0.3)
+
         fig.tight_layout()
-        StatsPlotter._save_and_close(fig, destination, "dataset_manifold.png")
+        StatsPlotter._save_and_close(fig, destination, "dataset_manifold_umap.png")
