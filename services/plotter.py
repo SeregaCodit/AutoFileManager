@@ -189,11 +189,9 @@ class StatsPlotter:
     @staticmethod
     def plot_dataset_manifold(
             df: pd.DataFrame,
-            features: List[str],
             class_col: str,
             destination: Union[Path, str, PdfPages],
             figsize: Tuple[int, int] = (14, 12),
-            n_jobs: int = 1,
     ) -> None:
         """
         Visualizes the high-dimensional data structure using UMAP.
@@ -203,11 +201,9 @@ class StatsPlotter:
 
         Args:
             df (pd.DataFrame): The feature matrix containing 'umap_x' and 'umap_y'.
-            features (List[str]): List of features used for manifold generation.
             class_col (str): Column name for class labels (used for color-coding).
             destination (Union[Path, str, PdfPages]): Output target.
             figsize (Tuple[int, int]): Figure size. Defaults to (14, 12).
-            n_jobs (int): Parallel processing jobs. Defaults to 1.
         """
 
         samples_per_class = 2000

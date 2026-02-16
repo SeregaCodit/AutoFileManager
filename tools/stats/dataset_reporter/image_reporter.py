@@ -19,19 +19,6 @@ class ImageDatasetReporter(BaseDatasetReporter):
         self.logger.info("Starting visual analytics pipeline...")
         class_col = ImageStatsKeys.class_name
 
-        # 1. Підготовка списку числових фіч
-        # exclude = {
-        #     class_col,
-        #     ImageStatsKeys.path,
-        #     ImageStatsKeys.mtime,
-        #     ImageStatsKeys.has_neighbors,
-        #     ImageStatsKeys.full_size,
-        #     ImageStatsKeys.objects_count
-        # }
-        #
-        # numeric_features = [c for c in df.select_dtypes(include=[np.number]).columns
-        #                     if c not in exclude and not c.startswith('outlier')]
-
         # --- ГРАФІК 1: Розподіл класів ---
         StatsPlotter.plot_class_distribution(df, destination)
 
