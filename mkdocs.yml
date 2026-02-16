@@ -54,6 +54,7 @@ nav:
       - Stats:
           - Feature extractor: api/feature_extractor.md
           - Image Analyzer: api/image_analyzer.md
+          - Outlier Detector: api/outlier_detector.md
           - Base Stats: api/base_stats.md
           - Yolo Stats: api/yolo_stats.md
           - VOC Stats: api/voc_stats.md

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from const_utils.stats_constansts import ImageStatsKeys
-from services.yolo_to_dict import YoloToDict
+from services.convertion_utils import to_voc_dict
 from tools.annotation_converter.reader.base import BaseReader
 from tools.stats.base_stats import BaseStats
 from tools.stats.extractor import FeatureExtractor
@@ -13,21 +13,46 @@ from tools.stats.image_analyzer import ImageContentAnalyzer
 
 
 class YoloStats(BaseStats):
+    """
+    Concrete analyzer for datasets in YOLO (.txt) format.
+
+    This class processes YOLO annotations by converting them into a temporary
+    dictionary format compatible with the common FeatureExtractor. It handles
+    multiprocessing logic and fuses geometric data with pixel-level metrics.
+    """
+
+    # Shared lookup map for image paths across worker processes
     _worker_image_map = {}
 
 
     @classmethod
     def _init_worker(cls, image_dict: Dict[str, str]):
         """
-        Prepares a worker process by storing a shared image map in the class memory.
+        Initializes a worker process with a shared image map.
+
+        This method ensures each parallel worker has access to the full
+        list of image paths during the analysis.
 
         Args:
-            image_dict (Dict[str, str]): A dictionary mapping image names to their paths.
+            image_dict (Dict[str, str]): Map of image stems to their absolute paths.
         """
         cls._worker_image_map = image_dict
 
+
     @staticmethod
     def get_umap_features(df: pd.DataFrame) -> List[str]:
+        """
+        Identifies numeric columns suitable for UMAP dimensionality reduction.
+
+        Filters out non-numeric data, identifiers, and outlier-specific columns
+        to prepare a clean input for the UMAP manifold generator.
+
+        Args:
+            df (pd.DataFrame): The main dataset feature matrix.
+
+        Returns:
+            List[str]: A list of selected column names for UMAP processing.
+        """
         exclude = {
             ImageStatsKeys.class_name,
             ImageStatsKeys.path,
@@ -42,6 +67,7 @@ class YoloStats(BaseStats):
 
         return numeric_features
 
+
     @staticmethod
     def _analyze_worker(
             file_path: Path,
@@ -51,18 +77,24 @@ class YoloStats(BaseStats):
 
     ) -> List[Dict[str, str]]:
         """
-        Processes a single VOC XML file to extract object features.
+        Processes a single YOLO text file and extracts combined features.
+
+        The worker follows these steps:
+            1. Reads the raw YOLO annotation file.
+            2. Converts normalized YOLO coordinates into an internal dictionary.
+            3. Extracts geometric features (area, sectors, truncation).
+            4. Performs image content analysis (brightness, contrast, etc.).
+            5. Merges all metrics into a final feature list.
 
         Args:
-            file_path (Path): Path to the .xml annotation file.
-            reader (BaseReader): An instance of XMLReader to parse the file.
-            margin_threshold (int): Distance from the image edge to detect truncation.
-            class_mapping (Optional[Dict[str, str]]): Optional mapping to rename classes.
+            file_path (Path): Path to the .txt YOLO annotation file.
+            reader (BaseReader): TXT reader instance to parse YOLO data.
+            margin_threshold (int): Distance from edges to detect object truncation.
+            class_mapping (Optional[Dict[str, str]]): Map to translate class IDs to names.
 
         Returns:
-            List[Dict[str, Any]]: A list of dictionaries containing features
-                for each object found in the XML. Returns an empty list
-                if the file is invalid.
+            List[Dict[str, Any]]: A list of feature dictionaries for all objects
+                in the file. Returns an empty list if any step fails.
         """
         try:
             annotation_data = reader.read(file_path)
@@ -76,7 +108,7 @@ class YoloStats(BaseStats):
                 return []
 
 
-            converted_dict = YoloToDict.to_voc_dict(
+            converted_dict = to_voc_dict(
                 annotations=annotation_data,
                 class_mapping=class_mapping,
                 correspond_img=correspond_img_str

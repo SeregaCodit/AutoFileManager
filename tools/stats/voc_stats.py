@@ -13,16 +13,29 @@ from tools.stats.image_analyzer import ImageContentAnalyzer
 
 class VOCStats(BaseStats):
     """
-    Statistics analyzer for Pascal VOC annotation format.
+    Concrete analyzer for datasets in Pascal VOC (XML) format.
 
-    This class implements the worker logic to process XML files. It coordinates
-    the reading of files and the extraction of geometric features for
-    dataset analysis.
+    This class implements the processing logic for XML annotation files.
+    It coordinates data reading, geometric feature extraction, and
+    pixel-level image analysis to build a comprehensive feature matrix.
     """
     _worker_image_map = {}
 
     @staticmethod
     def get_umap_features(df: pd.DataFrame) -> List[str]:
+        """
+        Selects relevant numeric columns for dimensionality reduction (UMAP).
+
+        Filters out metadata (paths, timestamps), categorical data,
+        and outlier flags to ensure UMAP focuses on geometric and
+        content-based manifold analysis.
+
+        Args:
+            df (pd.DataFrame): The complete feature matrix.
+
+        Returns:
+            List[str]: A list of numeric column names suitable for projection.
+        """
         exclude = {
             ImageStatsKeys.class_name,
             ImageStatsKeys.path,
@@ -40,10 +53,13 @@ class VOCStats(BaseStats):
     @classmethod
     def _init_worker(cls, image_dict: Dict[str, str]):
         """
-        Prepares a worker process by storing a shared image map in the class memory.
+        Initializes a worker process with a shared image lookup map.
+
+        This method is called once per worker process during the startup
+        of the ProcessPoolExecutor to provide fast access to image paths.
 
         Args:
-            image_dict (Dict[str, str]): A dictionary mapping image names to their paths.
+            image_dict (Dict[str, str]): Map of image stems to their absolute paths.
         """
         cls._worker_image_map = image_dict
 
@@ -56,19 +72,24 @@ class VOCStats(BaseStats):
 
     ) -> List[Dict[str, str]]:
         """
-        Processes a single VOC XML file to extract object features.
+         Parses a single VOC XML file and merges geometric data with pixel metrics.
 
-        Args:
-            file_path (Path): Path to the .xml annotation file.
-            reader (BaseReader): An instance of XMLReader to parse the file.
-            margin_threshold (int): Distance from the image edge to detect truncation.
-            class_mapping (Optional[Dict[str, str]]): Optional mapping to rename classes.
+         The workflow includes:
+             1. Parsing XML to get object coordinates.
+             2. Calculating geometric features (area, aspect ratio, etc.).
+             3. Analyzing image content (brightness, contrast, blur).
+             4. Fusing both data sources into a single record.
 
-        Returns:
-            List[Dict[str, Any]]: A list of dictionaries containing features
-                for each object found in the XML. Returns an empty list
-                if the file is invalid.
-        """
+         Args:
+             file_path (Path): Path to the .xml annotation file.
+             reader (BaseReader): XML parser instance.
+             margin_threshold (int): Margin for truncation detection.
+             class_mapping (Optional[Dict[str, str]]): ID-to-name mapping.
+
+         Returns:
+             List[Dict[str, str]]: A list of fused feature dictionaries
+                 for each object. Returns an empty list on failure.
+         """
         try:
             annotation_data = reader.read(file_path).get("annotation")
 

@@ -9,23 +9,29 @@ class FeatureExtractor:
     """
     Extracts geometric and spatial characteristics from raw annotation data.
 
-    This class processes annotation dictionaries to calculate detailed object
-    features, such as relative area, position in specific image sectors
-    (quadrants or sides), and truncation status at the borders.
+    This class processes bounding box coordinates to calculate technical
+    metrics such as relative area, aspect ratio, and spatial positioning.
+    It identifies which part of the image an object occupies and detects
+    if an object is cut off (truncated) at the image boundaries.
     """
     @staticmethod
     def extract_features(filepath: Union[Path, str], data: dict, margin_threshold: int = 5) -> List[Dict[str, Any]]:
         """
-        Analyzes a single annotation dictionary and computes features for every object.
+        Calculates geometric and spatial features for all objects in an image.
+
+        The method divides the image into sectors based on the center point
+        to determine object orientation (e.g., top-left, center, bottom-side).
 
         Args:
-            filepath: The path to the annotation file (used as a record key).
-            data: Raw dictionary containing image size and object bounding boxes.
-            margin_threshold: The pixel distance from the edge to mark
-                an object as truncated.
+            filepath (Union[Path, str]): Path to the annotation file, used as a unique ID.
+            data (dict): Dictionary containing image dimensions and object bounding boxes.
+            margin_threshold (int): Distance in pixels from the edge to consider
+                an object as 'truncated'. Defaults to 5.
 
         Returns:
-            List[dict]: Features for each object. Returns empty list if image size is invalid.
+            List[Dict[str, Any]]: A list of dictionaries, where each dictionary
+                contains features for a single object. Returns an empty list
+                if image dimensions are invalid (<= 0).
         """
         if not isinstance(filepath, str):
             filepath = str(filepath)
@@ -117,7 +123,6 @@ class FeatureExtractor:
                 truncated_bottom = 1 if ymax > (im_height - margin_threshold) else 0
 
                 full_size = 1 if all([
-                    truncated_bottom,
                     truncated_left,
                     truncated_right,
                     truncated_top,

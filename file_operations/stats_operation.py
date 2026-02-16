@@ -6,7 +6,7 @@ from const_utils.arguments import Arguments
 from const_utils.default_values import AppSettings
 from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
-from services.folder_namer import FolderNamer
+from services.directory_utils import generate_directory_name
 from tools.stats.base_stats import BaseStats
 from tools.stats.dataset_reporter.base_reporter import BaseDatasetReporter
 from tools.stats.dataset_reporter.image_reporter import ImageDatasetReporter
@@ -16,15 +16,22 @@ from tools.stats.yolo_stats import YoloStats
 
 class StatsOperation(FileOperation):
     """
-    This class show dataset information such as number of files object
-    distribution, areas distribution etc. It can be used to get
-    insights about the dataset before training a model.
-    It can also be used to identify potential issues with the dataset,
-    such as class or base features imbalance.
+    Orchestrates dataset analysis to extract geometric, spatial, and quality features.
+
+    This class processes annotations to provide insights into object distribution,
+    area variance, and potential dataset biases. It helps identify issues like
+    class imbalance or feature outliers before the model training phase.
     """
 
     def __init__(self, settings: AppSettings, **kwargs):
-        """Initializes the StatsOperation with settings and specific arguments."""
+        """
+        Initializes the StatsOperation with analytical engines and reporters.
+
+        Args:
+            settings (AppSettings): Global application configuration object.
+            **kwargs (dict): Additional parameters such as 'img_path', 'target_format',
+                and file extensions.
+        """
         super().__init__(settings, **kwargs)
         self.extensions = kwargs.get("ext", self.settings.extensions)
         self.img_path = kwargs.get('img_path')
@@ -48,8 +55,16 @@ class StatsOperation(FileOperation):
             extensions=self.extensions
         )
 
+
     @staticmethod
     def add_arguments(settings: AppSettings, parser: argparse.ArgumentParser) -> None:
+        """
+        Defines CLI arguments required for dataset statistics calculation.
+
+        Args:
+            settings (AppSettings): Global settings for default values.
+            parser (argparse.ArgumentParser): CLI argument parser instance.
+        """
         parser.add_argument(
             Arguments.destination_type,
             help=HelpStrings.destination_type,
@@ -78,12 +93,13 @@ class StatsOperation(FileOperation):
 
     def do_task(self):
         """
-        This method should implement the logic to calculate and display the statistics of the dataset.
-         It can include:
-            - Counting the number of files in each class.
-            - Calculating the distribution of object areas, positions etc.
-            - Identifying any class imbalance issues.
-            - Providing insights about the dataset that can help in model training and evaluation.
+        Executes the main analytical pipeline for the dataset.
+
+        The process includes:
+            1. Loading annotations and setting up class mappings.
+            2. Extracting a feature matrix (geometry, brightness, etc.).
+            3. Logging a summary report to the console.
+            4. Generating visual analytics (Plots, Heatmaps, and UMAP projections).
         """
         if self.target_format == "yolo":
             classes_mapping  = self.stats_method.set_class_mapping(file_paths=self.files_for_task)
@@ -100,26 +116,28 @@ class StatsOperation(FileOperation):
 
         self.reporter.show_console_report(df=df, target_format=self.target_format)
 
-        report_path = FolderNamer.next_name(src=self.settings.report_path)
+        report_path = generate_directory_name(src=self.settings.report_path)
         features = self.stats_method.get_umap_features(df=df)
         self.reporter.generate_visual_report(df=df, destination=report_path, features=features)
 
+
     @property
     def img_path(self) -> Path:
-        """Path: Returns the directory path where images are stored."""
+        """Path: The directory where source images are located."""
         return self._img_path
+
 
     @img_path.setter
     def img_path(self, img_path: Union[Path, str, None]) -> None:
         """
-        Sets the directory for images and validates the input.
+        Sets and validates the path to images folder.
 
         Args:
-        img_path (Union[Path, str, None]): Path to annotated images folder.
-            If None, it uses YOLO annotations same path .
+            img_path (Union[Path, str, None]): Path to the images.
+                If None, defaults to the source directory (common for YOLO).
 
         Raises:
-        TypeError: If the provided path is not a string or Path object.
+            TypeError: If the provided path is not a string, Path, or None.
         """
         if isinstance(img_path, Path):
             self._img_path = img_path
@@ -133,10 +151,12 @@ class StatsOperation(FileOperation):
             self.logger.error(msg)
             raise TypeError(msg)
 
+
     @property
     def extensions(self) -> Tuple[str, ...]:
         """Tuple[str, ...]: Returns the supported image file extensions."""
         return self._extensions
+
 
     @extensions.setter
     def extensions(self, value: Tuple[str, ...]) -> None:

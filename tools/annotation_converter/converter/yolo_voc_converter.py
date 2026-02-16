@@ -3,10 +3,9 @@ from functools import partial
 from pathlib import Path
 from typing import Dict, Tuple, Union, Optional
 
-import cv2
 import xmltodict
 
-from services.yolo_to_dict import YoloToDict
+from services.convertion_utils import to_voc_dict
 from tools.annotation_converter.converter.base import BaseConverter
 from tools.annotation_converter.reader.base import BaseReader
 from tools.annotation_converter.writer.base import BaseWriter
@@ -95,7 +94,7 @@ class YoloVocConverter(BaseConverter):
         if correspond_img_str is None:
             return False
 
-        converted_dict = YoloToDict.to_voc_dict(
+        converted_dict = to_voc_dict(
             annotations=yolo_annotations,
             class_mapping=class_mapping,
             correspond_img=correspond_img_str

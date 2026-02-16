@@ -11,13 +11,27 @@ from const_utils.stats_constansts import ImageStatsKeys
 
 class StatsPlotter:
     """
-    High-performance visualization service.
-    Follows a 'Dumb Renderer' pattern: receives prepared data and draws it.
+    Service for generating technical visualizations and reports.
+
+    This class follows the 'Dumb Renderer' pattern: it receives pre-calculated
+    data and focuses only on high-quality plotting. It supports various
+    chart types, including distribution bars, heatmaps, and UMAP projections.
     """
 
     @staticmethod
     def _save_and_close(fig, destination: Union[Path, str, PdfPages], filename: str):
-        """Handles polymorphic saving to either PDF or PNG."""
+        """
+        Handles polymorphic saving logic for plot figures.
+
+        Saves the figure to either  multi-page PDF document or a standalone
+        PNG file based on the destination type.
+
+        Args:
+            fig (plt.Figure): The Matplotlib figure object to save.
+            destination (Union[Path, str, PdfPages]): Target storage.
+                Can be a directory path or an active PdfPages object.
+            filename (str): Name of the file (used only for PNG output).
+        """
         if isinstance(destination, PdfPages):
             destination.savefig(fig)
         else:
@@ -29,6 +43,13 @@ class StatsPlotter:
 
     @staticmethod
     def plot_class_distribution(df: pd.DataFrame, destination: Union[Path, str, PdfPages]) -> None:
+        """
+        Creates a bar chart showing the number of objects per class.
+
+        Args:
+            df (pd.DataFrame): The dataset feature matrix.
+            destination (Union[Path, str, PdfPages]): Output target.
+        """
         fig, ax = plt.subplots(figsize=(10, 7))
         sns.countplot(
             data=df,
@@ -50,6 +71,16 @@ class StatsPlotter:
 
     @staticmethod
     def plot_geometry_analysis(df: pd.DataFrame, destination: Union[Path, str, PdfPages]) -> None:
+        """
+        Visualizes object size and aspect ratio distributions.
+
+        Generates boxplots for area (on a log scale) and violin plots
+        for shape proportions to help identify geometric outliers.
+
+        Args:
+            df (pd.DataFrame): The dataset feature matrix.
+            destination (Union[Path, str, PdfPages]): Output target.
+        """
         fig, axes = plt.subplots(1, 2, figsize=(16, 7))
 
         sns.boxplot(
@@ -86,7 +117,18 @@ class StatsPlotter:
             destination: Union[Path, str, PdfPages],
             filename: str
     ) -> None:
+        """
+        Generates a 3x3 density heatmap for object spatial placement.
 
+        Visualizes how objects are distributed across the image quadrants
+        (Top-Left, Center, Bottom-Right, etc.).
+
+        Args:
+            grid (List[List[int]]): 3x3 matrix containing object counts.
+            title (str): Title for the heatmap plot.
+            destination (Union[Path, str, PdfPages]): Output target.
+            filename (str): Name of the output image.
+        """
         fig, ax = plt.subplots(figsize=(8, 7))
         sns.heatmap(grid, annot=True, fmt="d", cmap="YlGnBu", ax=ax,
                     xticklabels=['Left', 'Center', 'Right'],
@@ -104,6 +146,20 @@ class StatsPlotter:
             figsize: Tuple[int, int] = (12, 10),
             annot_size: int = 7
     ) -> None:
+        """
+        Plots a feature relationship matrix (Correlation Heatmap).
+
+        Useful for identifying strongly linked features
+        and potential feature redundancy in the dataset.
+
+        Args:
+            corr_matrix (pd.DataFrame): Calculated correlation matrix.
+            title (str): Title for the chart.
+            destination (Union[Path, str, PdfPages]): Output target.
+            filename (str): Output filename.
+            figsize (Tuple[int, int]): Size of the figure. Defaults to (12, 10).
+            annot_size (int): Font size for annotations. Defaults to 7.
+        """
         fig, ax = plt.subplots(figsize=figsize)
 
         is_square = corr_matrix.shape[0] == corr_matrix.shape[1]
@@ -140,8 +196,18 @@ class StatsPlotter:
             n_jobs: int = 1,
     ) -> None:
         """
-        Generates a unified UMAP plot for the entire dataset.
-        Better than t-SNE for identifying gaps and clusters for balancing.
+        Visualizes the high-dimensional data structure using UMAP.
+
+        Creates a 2D scatter plot (manifold) that helps identify dataset
+        clusters, representation gaps, and informative overlaps between classes.
+
+        Args:
+            df (pd.DataFrame): The feature matrix containing 'umap_x' and 'umap_y'.
+            features (List[str]): List of features used for manifold generation.
+            class_col (str): Column name for class labels (used for color-coding).
+            destination (Union[Path, str, PdfPages]): Output target.
+            figsize (Tuple[int, int]): Figure size. Defaults to (14, 12).
+            n_jobs (int): Parallel processing jobs. Defaults to 1.
         """
 
         samples_per_class = 2000

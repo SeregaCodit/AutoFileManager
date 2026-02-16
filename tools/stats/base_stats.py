@@ -22,8 +22,12 @@ from services.outlier_detector import OutlierDetector
 
 class BaseStats(ABC):
     """
-    Base stats class. Based on the source format, defines reader classes for processing data, defines default
-        source annotation file suffixes
+    Abstract base class for dataset feature extraction and analysis.
+
+    This class defines the interface for reading different annotation formats
+    (YOLO, VOC) and provides a high-performance pipeline for feature extraction.
+    It supports incremental caching, multi-process execution, and UMAP
+    dimensionality reduction for visual manifold analysis.
     """
     TASK: str = "stats"
 
@@ -38,12 +42,16 @@ class BaseStats(ABC):
             extensions: Optional[Tuple[str, ...]] = None,
     ):
         """
-        Initialize the stats class.
+        Initializes the analytical engine with specific formats and IO tools.
 
         Args:
-            source_format (str): The format of source annotation (e.g., 'yolo').
-            log_level: (str): The lowest logging level print to (e.g., 'debug').
-            **kwargs (dict): Additional parameters like 'img_path' or 'labels_path'.
+            source_format (str): Annotation format identifier (e.g., 'yolo', 'voc').
+            log_level (str): Minimum logging level. Defaults to 'INFO'.
+            log_path (Optional[Path]): Directory for log files.
+            settings (Optional[AppSettings]): Application-wide settings.
+            cache_io (Optional[CacheIO]): Component for Parquet-based caching.
+            img_path (Optional[Union[Path, str]]): Path to the dataset images.
+            extensions (Optional[Tuple[str, ...]]): Valid image file extensions.
         """
 
         self.reader_mapping = {
@@ -74,6 +82,12 @@ class BaseStats(ABC):
     @classmethod
     @abstractmethod
     def _init_worker(cls, images: Dict[str, str]) -> None:
+        """
+        Initializes a static worker with shared data for multiprocessing.
+
+        Args:
+            images (Dict[str, str]): A dictionary mapping image stems to absolute paths.
+        """
         pass
 
     @staticmethod
@@ -84,11 +98,33 @@ class BaseStats(ABC):
             margin_threshold: int = 5,
             class_mapping: Optional[Dict[str, str]] = None
     ) -> List[Dict[str, str]]:
+        """
+        Processes a single annotation file to extract features.
+
+        Args:
+            file_path (Path): Path to the annotation file.
+            reader (BaseReader): Annotation reader instance.
+            margin_threshold (int): Pixel margin for boundary analysis.
+            class_mapping (Optional[Dict[str, str]]): Map of class IDs to names.
+
+        Returns:
+            List[Dict[str, str]]: A list of dictionaries, where each dict represents
+                features of one detected object.
+        """
         pass
 
     @staticmethod
     @abstractmethod
     def get_umap_features(df: pd.DataFrame) -> List[str]:
+        """
+        Defines the list of numeric features to be used for UMAP projection.
+
+        Args:
+            df (pd.DataFrame): The extracted feature matrix.
+
+        Returns:
+            List[str]: List of column names for dimensionality reduction.
+        """
         pass
 
     def get_features(
@@ -96,7 +132,21 @@ class BaseStats(ABC):
             file_paths: Tuple[Path, ...],
             class_mapping: Optional[Dict[str, str]] = None
     ) -> pd.DataFrame:
+        """
+        Orchestrates feature extraction using incremental caching and parallel processing.
 
+        This method checks the modification time (mtime) of each file. It only
+        processes new or changed files, significantly reducing execution time
+        for large datasets.
+
+        Args:
+            file_paths (Tuple[Path, ...]): List of annotation files to process.
+            class_mapping (Optional[Dict[str, str]]): Class ID to name mapping.
+
+        Returns:
+            pd.DataFrame: A complete feature matrix including UMAP coordinates
+                and outlier flags.
+        """
         if not file_paths:
             return pd.DataFrame()
 
@@ -176,8 +226,17 @@ class BaseStats(ABC):
 
     def compute_umap_coords(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
         """
-        Enterprise standard: Calculates UMAP coordinates for the ENTIRE dataset
-        and returns them as new columns.
+        Performs dimensionality reduction to visualize the dataset manifold.
+
+        Uses StandardScaler for normalization and UMAP to project high-dimensional
+        features into a 2D space. Results are saved as 'umap_x' and 'umap_y' columns.
+
+        Args:
+            df (pd.DataFrame): The feature matrix.
+            features (List[str]): Columns to be used for reduction.
+
+        Returns:
+            pd.DataFrame: DataFrame with added UMAP coordinates.
         """
 
         x_data = df[features].fillna(0)
@@ -196,7 +255,18 @@ class BaseStats(ABC):
 
         return df
 
-    def set_class_mapping(self, file_paths: Tuple[Path]):
+    def set_class_mapping(self, file_paths: Tuple[Path]) -> Dict[str, str]:
+        """
+        Identifies and loads the class name mapping from a definition file.
+
+        Specifically looks for 'classes.txt' in the source directory (YOLO standard).
+
+        Args:
+            file_paths (Tuple[Path]): List of files in the source directory.
+
+        Returns:
+            Dict[str, str]: A dictionary mapping class IDs to human-readable names.
+        """
         classes_file = next((path for path in file_paths if path.name == "classes.txt"), None)
         if classes_file is None:
             self.logger.warning(
