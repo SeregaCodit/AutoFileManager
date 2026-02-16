@@ -56,9 +56,10 @@ MAPPING = {
     Commands.stats: [
         "data_forge.py",
         "stats",
-        "./media/annotated/",
-        "-p", ".txt",
-        "--destination-type", "yolo",
+        "./media/Pascal VOC 2012.v1-raw.voc/",
+        # "./media/annotated/",
+        "-p", ".xml",
+        "--destination-type", "voc",
     ]
 }
 

@@ -85,7 +85,7 @@ class ImageDatasetReporter(BaseDatasetReporter):
                                                      f"corr_{name}.png")
 
         # UMAP manifold projection
-        StatsPlotter.plot_dataset_manifold(df, features, class_col, destination, n_jobs=self.settings.n_jobs)
+        StatsPlotter.plot_dataset_manifold(df=df, class_col=class_col, destination=destination)
 
     def show_console_report(self, df: pd.DataFrame, target_format: str) -> None:
         """
