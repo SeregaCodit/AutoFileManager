@@ -40,7 +40,7 @@ MAPPING = {
         # "/mnt/qnap/Staff/Naumenko/NotTheSkynet/img_dataset/",
         # "/home/pivden/PycharmProjects/yoloTrainer/saved_imgs/",
         "-p", ".jpg", ".png",
-        "--filetype", "image",
+        "--datatype", "image",
         "--threshold", "10",
         "--cache_name", "test1"
     ],
@@ -52,6 +52,14 @@ MAPPING = {
         "-p", "yolo",
         "--img_path", "./media/annotated/", # only for converting from yolo format
         "--destination-type", "voc"
+    ],
+    Commands.stats: [
+        "data_forge.py",
+        "stats",
+        "./media/Pascal VOC 2012.v1-raw.voc/",
+        # "./media/annotated/",
+        "-p", ".xml",
+        "--destination-type", "voc",
     ]
 }
 
@@ -60,6 +68,6 @@ if __name__ == "__main__":
     MAPPING[Commands.dedup].append("16")
 
 
-    sys.argv = MAPPING[Commands.dedup]
+    sys.argv = MAPPING[Commands.stats]
     app = DataForge()
     app.execute()
