@@ -56,8 +56,8 @@ MAPPING = {
     Commands.stats: [
         "data_forge.py",
         "stats",
-        "./media/Pascal VOC 2012.v1-raw.voc/",
-        # "./media/annotated/",
+        # "./media/Pascal VOC 2012.v1-raw.voc/",
+        "./media/annotated/",
         "-p", ".xml",
         "--destination-type", "voc",
     ]

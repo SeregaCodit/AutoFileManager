@@ -1,4 +1,5 @@
 import argparse
+import time
 from pathlib import Path
 from typing import Union
 
@@ -6,6 +7,7 @@ from const_utils.arguments import Arguments
 from const_utils.default_values import AppSettings
 from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
+from services.timeout import wait
 from tools.mixins.file_remover import FileRemoverMixin
 
 
@@ -79,6 +81,8 @@ class CleanAnnotationsOperation(FileOperation, FileRemoverMixin):
                     self.logger.info(f"Removed {a_path.stem}")
 
         self.logger.info(f"Removed {orphans_removed} orphan annotations")
+
+        wait(logger=self.logger, timeout=self.sleep)
 
 
     @property

@@ -1,9 +1,12 @@
 import argparse
+import time
+
 from const_utils.arguments import Arguments
 from const_utils.copmarer import Constants
 from const_utils.default_values import AppSettings
 from const_utils.parser_help import HelpStrings
 from file_operations.file_operation import FileOperation
+from services.timeout import wait
 from tools.mixins.file_remover import FileRemoverMixin
 from tools.comparer.img_comparer.img_comparer import ImageComparer
 
@@ -99,7 +102,9 @@ class DedupOperation(FileOperation, FileRemoverMixin):
         self.logger.info(f"Found {duplicates_count} duplicates in {len(self.files_for_task)} files")
 
         if duplicates_count > 0 and self.confirm_removing():
-                self.remove_all(duplicates)
+            self.remove_all(duplicates)
+
+        wait(logger=self.logger, timeout=self.sleep)
 
     def confirm_removing(self) -> bool:
         """
