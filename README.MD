@@ -1,6 +1,6 @@
 # DataForge 
 
-**DataForge** is a high-performance CLI tool designed to automate the preparation and management of machine learning datasets. It helps you transform raw data (like videos and unsorted images) into clean, balanced, and ready-to-train datasets with minimal effort.
+**DataForge** is a  CLI tool designed to automate the preparation and management of machine learning datasets. It helps you transform raw data (like videos and unsorted images) into clean, balanced, and ready-to-train datasets with minimal effort.
 
 [Read the full documentation here](https://seregacodit.github.io/DataForge)
 
